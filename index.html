@@ -175,6 +175,12 @@
             padding-bottom: 15px;
         }
 
+        .tasks-table th:first-child {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #333;
+        }
+
         .tasks-table th.active {
             color: #5b7fff;
             position: relative;
@@ -532,6 +538,19 @@
                 padding: 5px 2px;
                 font-size: 0.9em;
                 padding-bottom: 10px;
+            }
+
+            .tasks-table th:first-child {
+                font-size: 1.1em;
+                font-weight: 700;
+            }
+
+            .tasks-table th:nth-child(2)::after {
+                content: "Ruth";
+            }
+
+            .tasks-table th:nth-child(2) {
+                font-size: 0;
             }
 
             .tasks-table td {
