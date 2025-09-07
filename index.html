@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Morning Todo List</title>
 
     <!-- iOS Web App Meta Tags -->
@@ -540,7 +540,6 @@
             placeholder="Write a loving message, reminder, or encouragement for your kids... ❤️"
             oninput="updateMessage(); debouncedSave();"
             onblur="clearTimeout(saveTimeout); updateMessage(); saveToCloud();"
-            ontouchstart="this.focus();"
         ></textarea>
         <div class="message-display" id="messageDisplay"></div>
     </div>
