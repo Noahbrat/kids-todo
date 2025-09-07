@@ -505,13 +505,134 @@
     let isDragging = false;
     let motherMessage = "Good morning, my beautiful children! Remember to be kind to each other and have a wonderful day! ❤️";
     
-    // Local Storage Functions
-    function saveToLocalStorage() {
+    // Cloud Storage Configuration
+    // SETUP INSTRUCTIONS:
+    // 1. Go to https://jsonbin.io/ and create a free account
+    // 2. Go to API Keys section and create a new API key
+    // 3. Replace 'YOUR_API_KEY_HERE' with your actual API key (starts with $2a$10$...)
+    // 4. The BIN_ID will be generated automatically on first save (check browser console)
+    // 5. After first save, update 'YOUR_BIN_ID_HERE' with the generated bin ID
+    const JSONBIN_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your JSONBin.io API key
+    const JSONBIN_BIN_ID = 'YOUR_BIN_ID_HERE';   // Replace with your bin ID (created automatically)
+    
+    // Cloud Storage Functions
+    async function saveToCloud() {
         const dataToSave = {
             version: 1,
             tasks: tasks,
-            motherMessage: motherMessage
+            motherMessage: motherMessage,
+            lastUpdated: new Date().toISOString()
         };
+        
+        try {
+            // Show loading state
+            setLoadingState(true, 'Saving...');
+            
+            // First try: Create or update the bin
+            let response;
+            if (JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE') {
+                // Create new bin on first save
+                response = await fetch('https://api.jsonbin.io/v3/b', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify(dataToSave)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    // You'll need to manually update JSONBIN_BIN_ID with the returned ID
+                    console.log('New bin created! Update JSONBIN_BIN_ID to:', result.metadata.id);
+                    showMessage('Data saved! (Update bin ID in code)', 'success');
+                }
+            } else {
+                // Update existing bin
+                response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify(dataToSave)
+                });
+                
+                if (response.ok) {
+                    showMessage('Data saved to cloud!', 'success');
+                }
+            }
+            
+            if (!response.ok) {
+                throw new Error(`Cloud save failed: ${response.status}`);
+            }
+            
+            // Also save to localStorage as backup
+            saveToLocalStorage(dataToSave);
+            
+        } catch (error) {
+            console.error('Cloud save error:', error);
+            // Fall back to localStorage
+            saveToLocalStorage(dataToSave);
+            showMessage('Saved locally (cloud unavailable)', 'warning');
+        } finally {
+            setLoadingState(false);
+        }
+    }
+    
+    async function loadFromCloud() {
+        try {
+            setLoadingState(true, 'Loading...');
+            
+            if (JSONBIN_API_KEY === 'YOUR_API_KEY_HERE' || JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE') {
+                // API not configured, use localStorage
+                return loadFromLocalStorage();
+            }
+            
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                method: 'GET',
+                headers: {
+                    'X-Master-Key': JSONBIN_API_KEY
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                const data = result.record;
+                
+                if (data.version === 1 && data.tasks && data.motherMessage !== undefined) {
+                    tasks = data.tasks;
+                    motherMessage = data.motherMessage;
+                    showMessage('Data loaded from cloud!', 'success');
+                    return true;
+                }
+            } else {
+                throw new Error(`Cloud load failed: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Cloud load error:', error);
+            // Fall back to localStorage
+            const loaded = loadFromLocalStorage();
+            if (loaded) {
+                showMessage('Loaded from local storage', 'warning');
+            }
+            return loaded;
+        } finally {
+            setLoadingState(false);
+        }
+        
+        return false;
+    }
+    
+    // localStorage backup functions
+    function saveToLocalStorage(dataToSave = null) {
+        if (!dataToSave) {
+            dataToSave = {
+                version: 1,
+                tasks: tasks,
+                motherMessage: motherMessage
+            };
+        }
         localStorage.setItem('kidsTodoData', JSON.stringify(dataToSave));
     }
     
@@ -530,6 +651,56 @@
             console.log('Error loading from localStorage:', e);
         }
         return false;
+    }
+    
+    // UI feedback functions
+    function setLoadingState(loading, message = '') {
+        const container = document.querySelector('.container');
+        if (loading) {
+            container.style.opacity = '0.7';
+            if (message) {
+                showMessage(message, 'info');
+            }
+        } else {
+            container.style.opacity = '1';
+        }
+    }
+    
+    function showMessage(text, type = 'info') {
+        // Remove existing messages
+        const existingMessage = document.querySelector('.toast-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        
+        const message = document.createElement('div');
+        message.className = `toast-message toast-${type}`;
+        message.textContent = text;
+        message.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${type === 'success' ? '#4caf50' : type === 'warning' ? '#ff9800' : '#2196f3'};
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 2000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        `;
+        
+        document.body.appendChild(message);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            if (message.parentNode) {
+                message.style.opacity = '0';
+                message.style.transform = 'translateX(-50%) translateY(-10px)';
+                setTimeout(() => message.remove(), 300);
+            }
+        }, 3000);
     }
     
     let tasks = {
@@ -820,7 +991,7 @@
 
             input.value = '';
             renderTasks();
-            saveToLocalStorage();
+            saveToCloud();
         }
     }
 
@@ -834,7 +1005,7 @@
                 }
             });
             renderTasks();
-            saveToLocalStorage();
+            saveToCloud();
         }
     }
 
@@ -845,7 +1016,7 @@
                 tasks[person].splice(index, 1);
             });
             renderTasks();
-            saveToLocalStorage();
+            saveToCloud();
         }
     }
 
@@ -857,7 +1028,7 @@
             }
         });
         renderTasks();
-        saveToLocalStorage();
+        saveToCloud();
     }
 
     function cycleTaskStatus(index, person) {
@@ -879,7 +1050,7 @@
             }
         });
         renderTasks();
-        saveToLocalStorage();
+        saveToCloud();
     }
 
     function resetAllTasks() {
@@ -900,7 +1071,7 @@
             updateMessageDisplay();
             
             renderTasks();
-            saveToLocalStorage();
+            saveToCloud();
         }
     }
 
@@ -914,7 +1085,7 @@
         
         // Re-render the tasks to reflect the new order
         renderTasks();
-        saveToLocalStorage();
+        saveToCloud();
     }
 
     function moveTaskUp(index) {
@@ -1000,7 +1171,7 @@
                     }
                 });
                 renderTasks();
-                saveToLocalStorage();
+                saveToCloud();
                 closePicker();
             };
             picker.appendChild(btn);
@@ -1014,24 +1185,30 @@
 
     function updateMessage() {
         motherMessage = document.getElementById('messageTextarea').value;
-        saveToLocalStorage();
+        saveToCloud();
     }
     
     function updateMessageDisplay() {
         document.getElementById('messageDisplay').textContent = motherMessage;
     }
 
-    // Load saved data or use defaults
-    if (!loadFromLocalStorage()) {
-        // No saved data, save the default data
-        saveToLocalStorage();
+    // Initialize app with cloud storage
+    async function initializeApp() {
+        const loaded = await loadFromCloud();
+        if (!loaded) {
+            // No saved data, save the default data to cloud
+            await saveToCloud();
+        }
+        
+        // Initial render - start in todo mode
+        document.getElementById('resetButtonContainer').classList.remove('hidden');
+        updateTableHeader();
+        renderTasks();
+        updateMessageDisplay();
     }
     
-    // Initial render - start in todo mode
-    document.getElementById('resetButtonContainer').classList.remove('hidden');
-    updateTableHeader();
-    renderTasks();
-    updateMessageDisplay();
+    // Start the app
+    initializeApp();
 </script>
 </body>
 </html>
