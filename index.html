@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Morning Todo List</title>
 
     <!-- iOS Web App Meta Tags -->
@@ -538,7 +538,9 @@
             class="message-textarea hidden"
             id="messageTextarea"
             placeholder="Write a loving message, reminder, or encouragement for your kids... ❤️"
-            oninput="updateMessage()"
+            oninput="updateMessage(); debouncedSave();"
+            onblur="clearTimeout(saveTimeout); updateMessage(); saveToCloud();"
+            ontouchstart="this.focus();"
         ></textarea>
         <div class="message-display" id="messageDisplay"></div>
     </div>
@@ -797,6 +799,13 @@
 
     // Mode switching
     document.getElementById('todoModeBtn').addEventListener('click', () => {
+        // Save message when switching from edit mode
+        if (currentMode === 'edit') {
+            clearTimeout(saveTimeout);
+            updateMessage();
+            saveToCloud();
+        }
+        
         currentMode = 'todo';
         document.getElementById('todoModeBtn').className = 'mode-btn todo-mode';
         document.getElementById('editModeBtn').className = 'mode-btn inactive';
@@ -823,6 +832,12 @@
         document.getElementById('messageTextarea').classList.remove('hidden');
         document.getElementById('messageDisplay').classList.add('hidden');
         document.getElementById('messageTextarea').value = motherMessage;
+
+        // iOS keyboard fix - delay focus to ensure textarea is visible
+        setTimeout(() => {
+            const textarea = document.getElementById('messageTextarea');
+            textarea.focus();
+        }, 100);
 
         updateTableHeader();
         renderTasks();
@@ -1259,7 +1274,15 @@
 
     function updateMessage() {
         motherMessage = document.getElementById('messageTextarea').value;
-        saveToCloud();
+    }
+
+    // Debounced save to avoid API calls on every keystroke
+    let saveTimeout;
+    function debouncedSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            saveToCloud();
+        }, 1500); // Wait 1.5 seconds after user stops typing
     }
 
     function updateMessageDisplay() {
