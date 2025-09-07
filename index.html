@@ -1685,9 +1685,14 @@
 
     function deleteMessageFromHistory(index) {
         if (index >= 0 && index < messageHistory.length) {
-            messageHistory.splice(index, 1);
-            renderMessageHistory();
-            saveToCloud();
+            const message = messageHistory[index].message;
+            const preview = message.length > 50 ? message.substring(0, 50) + '...' : message;
+            
+            if (confirm(`Are you sure you want to delete this message?\n\n"${preview}"\n\nThis action cannot be undone.`)) {
+                messageHistory.splice(index, 1);
+                renderMessageHistory();
+                saveToCloud();
+            }
         }
     }
 
