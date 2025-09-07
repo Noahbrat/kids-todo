@@ -33,8 +33,8 @@ A touch-friendly morning todo list app designed specifically for kids, with emoj
 ## Usage 🚀
 
 ### Getting Started
-1. Open `index.html` in any modern web browser
-2. Or visit the live version: [GitHub Pages URL] (if enabled)
+1. **Live Version**: Visit https://noahbrat.github.io/kids-todo/
+2. **Local Version**: Open `index.html` in any modern web browser
 
 ### iPad Installation
 1. Open the app in Safari on your iPad
