@@ -1235,24 +1235,33 @@
             } else {
                 const input = document.createElement('div');
                 input.className = 'task-input';
-                if (task.completed.ruthie === null) {
+                const status = task.completed.ruthie;
+                
+                // Apply styling based on current status
+                if (status === null) {
                     input.className += ' na';
                     input.textContent = 'N/A';
                     input.style.background = '#999';
                     input.style.color = 'white';
                     input.style.borderColor = '#999';
-                } else if (task.completed.ruthie === true) {
+                } else if (status === true) {
                     input.textContent = 'Yes';
                     input.style.background = '#4caf50';
                     input.style.color = 'white';
                     input.style.borderColor = '#4caf50';
-                } else {
+                } else { // status === false or undefined
                     input.textContent = 'No';
                     input.style.background = '#f44336';
                     input.style.color = 'white';
                     input.style.borderColor = '#f44336';
                 }
-                input.onclick = () => cycleTaskStatus(index, 'ruthie');
+                
+                // Add click handler with better event handling
+                input.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cycleTaskStatus(index, 'ruthie');
+                };
                 ruthieCell.appendChild(input);
             }
             row.appendChild(ruthieCell);
@@ -1273,24 +1282,33 @@
             } else {
                 const input = document.createElement('div');
                 input.className = 'task-input';
-                if (task.completed.lily === null) {
+                const status = task.completed.lily;
+                
+                // Apply styling based on current status
+                if (status === null) {
                     input.className += ' na';
                     input.textContent = 'N/A';
                     input.style.background = '#999';
                     input.style.color = 'white';
                     input.style.borderColor = '#999';
-                } else if (task.completed.lily === true) {
+                } else if (status === true) {
                     input.textContent = 'Yes';
                     input.style.background = '#4caf50';
                     input.style.color = 'white';
                     input.style.borderColor = '#4caf50';
-                } else {
+                } else { // status === false or undefined
                     input.textContent = 'No';
                     input.style.background = '#f44336';
                     input.style.color = 'white';
                     input.style.borderColor = '#f44336';
                 }
-                input.onclick = () => cycleTaskStatus(index, 'lily');
+                
+                // Add click handler with better event handling
+                input.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cycleTaskStatus(index, 'lily');
+                };
                 lilyCell.appendChild(input);
             }
             row.appendChild(lilyCell);
@@ -1311,24 +1329,33 @@
             } else {
                 const input = document.createElement('div');
                 input.className = 'task-input';
-                if (task.completed.allie === null) {
+                const status = task.completed.allie;
+                
+                // Apply styling based on current status
+                if (status === null) {
                     input.className += ' na';
                     input.textContent = 'N/A';
                     input.style.background = '#999';
                     input.style.color = 'white';
                     input.style.borderColor = '#999';
-                } else if (task.completed.allie === true) {
+                } else if (status === true) {
                     input.textContent = 'Yes';
                     input.style.background = '#4caf50';
                     input.style.color = 'white';
                     input.style.borderColor = '#4caf50';
-                } else {
+                } else { // status === false or undefined
                     input.textContent = 'No';
                     input.style.background = '#f44336';
                     input.style.color = 'white';
                     input.style.borderColor = '#f44336';
                 }
-                input.onclick = () => cycleTaskStatus(index, 'allie');
+                
+                // Add click handler with better event handling
+                input.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cycleTaskStatus(index, 'allie');
+                };
                 allieCell.appendChild(input);
             }
             row.appendChild(allieCell);
@@ -1392,6 +1419,8 @@
             });
 
             input.value = '';
+            
+            // Re-render immediately to ensure event handlers are properly attached
             renderTasks();
             saveToCloud();
         }
@@ -1434,23 +1463,31 @@
     }
 
     function cycleTaskStatus(index, person) {
-        // Cycle through: No -> Yes -> N/A (for applicable people) -> No
+        // Cycle through: No -> Yes -> N/A -> No
+        const currentStatus = tasks[currentPerson][index]?.completed[person];
+        
+        let newStatus;
+        if (currentStatus === false) {
+            // No -> Yes
+            newStatus = true;
+        } else if (currentStatus === true) {
+            // Yes -> N/A (mark as null to indicate not applicable)
+            newStatus = null;
+        } else if (currentStatus === null) {
+            // N/A -> No
+            newStatus = false;
+        } else {
+            // Fallback case - if status is undefined or unexpected, set to false
+            newStatus = false;
+        }
+        
+        // Update the status for this person across all task lists
         Object.keys(tasks).forEach(taskPerson => {
             if (tasks[taskPerson][index]) {
-                const currentStatus = tasks[taskPerson][index].completed[person];
-
-                if (currentStatus === false) {
-                    // No -> Yes
-                    tasks[taskPerson][index].completed[person] = true;
-                } else if (currentStatus === true) {
-                    // Yes -> N/A (mark as null to indicate not applicable)
-                    tasks[taskPerson][index].completed[person] = null;
-                } else {
-                    // N/A -> No
-                    tasks[taskPerson][index].completed[person] = false;
-                }
+                tasks[taskPerson][index].completed[person] = newStatus;
             }
         });
+        
         renderTasks();
         saveToCloud();
     }
