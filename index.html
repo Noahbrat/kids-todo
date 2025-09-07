@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morning Todo List</title>
+    
+    <!-- iOS Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Morning Todo">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8cmFkaWFsR3JhZGllbnQgaWQ9InN1bnNldCIgY3g9IjUwJSIgY3k9IjcwJSIgcj0iNjAlIj4KPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGRjNBMCIvPgo8c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGQzY1NyIvPgo8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGRjhBODAiLz4KPC9yYWRpYWxHcmFkaWVudD4KPC9kZWZzPgo8cGF0aCBkPSJNMCAwSDE4MFYxODBIMFoiIGZpbGw9InVybCgjc3Vuc2V0KSIvPgo8Y2lyY2xlIGN4PSI5MCIgY3k9IjEyMCIgcj0iMzUiIGZpbGw9IiNGRkY3Q0QiIHN0cm9rZT0iI0ZGRUMwMCIgc3Ryb2tlLXdpZHRoPSIzIi8+CjwhLS0gU3VuIHJheXMgLS0+CjxwYXRoIGQ9Ik05MCA2MEw5MCA0NSIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTI1IDc3TDEzNSA2NyIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTQyIDEyMEwxNTcgMTIwIiBzdHJva2U9IiNGRkVDMDAiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjxwYXRoIGQ9Ik01NSA3N0w0NSA2NyIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMzggMTIwTDIzIDEyMCIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8IS0tIENoZWNrbWFyayAtLT4KPHBhdGggZD0iTTcwIDEzNUw4MiAxNDdMTEwIDExOSIgc3Ryb2tlPSIjNENBRjUwIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGRlZnM+CjxyYWRpYWxHcmFkaWVudCBpZD0ic3Vuc2V0MzIiIGN4PSI1MCUiIGN5PSI3MCUiIHI9IjYwJSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGRkYzQTAiLz4KPHN0b3Agb2Zmc2V0PSI1MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGRkM2NTciLz4KPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY4QTgwIi8+CjwvcmFkaWFsR3JhZGllbnQ+CjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSJ1cmwoI3N1bnNldDMyKSIgcng9IjQiLz4KPGNpcmNsZSBjeD0iMTYiIGN5PSIyMCIgcj0iNiIgZmlsbD0iI0ZGRjdDRCIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjEiLz4KPHBhdGggZD0iTTE2IDEyTDE2IDEwIiBzdHJva2U9IiNGRkVDMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjxwYXRoIGQ9Ik0yMiAxNkwyNCAxNiIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTAgMTZMOCAxNiIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTIgMjRMMTUgMjEiIHN0cm9rZT0iIzRDQUY1MCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz4KPC9zdmc+Cg==">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.todo-mode {
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-btn.edit-mode {
+            background: #5b7fff;
+            color: white;
+            box-shadow: 0 2px 10px rgba(91, 127, 255, 0.3);
+        }
+
+        .mode-btn.inactive {
+            background: #f0f0f0;
+            color: #999;
+            box-shadow: none;
+        }
+
+        .people-tabs {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .person-tab {
+            padding: 10px 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #999;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .person-tab.active {
+            color: #5b7fff;
+        }
+
+        .person-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #5b7fff;
+            border-radius: 2px;
+        }
+
+        .tasks-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 15px;
+        }
+
+        .tasks-table th {
+            padding: 10px;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #666;
+            text-align: center;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+
+        .tasks-table th.active {
+            color: #5b7fff;
+            position: relative;
+        }
+
+        .tasks-table th.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background: #5b7fff;
+            border-radius: 2px;
+        }
+
+        .tasks-table tr.task-row {
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .tasks-table tr.task-row:hover {
+            background: #f0f1f3;
+            transform: translateX(5px);
+        }
+
+        .tasks-table td {
+            padding: 15px;
+            text-align: center;
+            border-radius: 12px;
+        }
+
+        .tasks-table td:first-child {
+            text-align: left;
+            font-size: 1.2em;
+            color: #333;
+            min-width: 200px;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .tasks-table td:last-child {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .task-input {
+            padding: 8px 15px;
+            border: 2px solid #5b7fff;
+            border-radius: 20px;
+            background: white;
+            color: #5b7fff;
+            font-size: 1em;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .task-input.na {
+            border-color: #999;
+            background: #999;
+            color: white;
+        }
+
+        .task-checkbox {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            transform: scale(2);
+        }
+
+        .btn {
+            padding: 6px 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 2px;
+        }
+
+        .btn-edit {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #da190b;
+            transform: scale(1.05);
+        }
+
+        .btn-move {
+            background: #2196f3;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1em;
+            min-width: 28px;
+        }
+
+        .btn-move:hover:not(:disabled) {
+            background: #1976d2;
+            transform: scale(1.05);
+        }
+
+        .btn-move:disabled {
+            background: #ccc;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reset-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .reset-btn {
+            padding: 12px 30px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+        }
+
+        .reset-btn:hover {
+            background: #e55a2b;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .add-task-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f7ff;
+            border-radius: 12px;
+            border: 2px dashed #5b7fff;
+        }
+
+        .add-task-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #5b7fff;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .add-task-btn {
+            padding: 10px 30px;
+            background: #5b7fff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-task-btn:hover {
+            background: #4a6ee0;
+            transform: scale(1.05);
+        }
+
+        .emoji-picker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            padding: 60px 60px 120px 60px;
+            z-index: 1000;
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .emoji-picker-header {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+
+        .emoji-close-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .emoji-close-btn:hover {
+            background: #da190b;
+            transform: scale(1.1);
+        }
+
+        .emoji-option {
+            background: none;
+            border: none;
+            font-size: 2.2em;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 10px;
+            transition: all 0.2s;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-option:hover {
+            background-color: #f0f0f0;
+        }
+
+        .emoji-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 999;
+        }
+
+
+        .message-area {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff9c4 0%, #ffe4e1 100%);
+            border-radius: 15px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #8b4513;
+        }
+
+        .message-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            line-height: 1.5;
+            resize: vertical;
+            background: rgba(255, 255, 255, 0.8);
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .message-textarea:focus {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        .message-display {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            font-size: 1em;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            min-height: 60px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .message-display:empty::before {
+            content: "No message today ✨";
+            color: #999;
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <span style="font-size: 2.5em;">🌅</span>
+        <h1>Morning Todo List</h1>
+    </div>
+
+    <div class="mode-buttons">
+        <button class="mode-btn todo-mode" id="todoModeBtn">Todo Mode</button>
+        <button class="mode-btn inactive" id="editModeBtn">Edit Mode</button>
+    </div>
+
+<table class="tasks-table" id="tasksTable">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Ruthie</th>
+                <th>Lily</th>
+                <th>Allie</th>
+            </tr>
+        </thead>
+        <tbody id="tasksList">
+        </tbody>
+    </table>
+
+    <div class="reset-button-container hidden" id="resetButtonContainer">
+        <button class="reset-btn" onclick="resetAllTasks()">Reset All Tasks</button>
+    </div>
+
+    <div class="add-task-form hidden" id="addTaskForm">
+        <input type="text" class="add-task-input" id="newTaskInput" placeholder="Enter new task...">
+        <button class="add-task-btn" onclick="addTask()">Add Task</button>
+    </div>
+
+    <div class="message-area" id="messageArea">
+        <div class="message-header">
+            <span>💝</span>
+            <span>Message from Mom</span>
+        </div>
+        <textarea 
+            class="message-textarea hidden" 
+            id="messageTextarea"
+            placeholder="Write a loving message, reminder, or encouragement for your kids... ❤️"
+            oninput="updateMessage()"
+        ></textarea>
+        <div class="message-display" id="messageDisplay"></div>
+    </div>
+</div>
+
+<script>
+    let currentMode = 'todo';
+    let currentPerson = 'ruthie';
+    let isDragging = false;
+    let motherMessage = "Good morning, my beautiful children! Remember to be kind to each other and have a wonderful day! ❤️";
+    
+    // Local Storage Functions
+    function saveToLocalStorage() {
+        const dataToSave = {
+            version: 1,
+            tasks: tasks,
+            motherMessage: motherMessage
+        };
+        localStorage.setItem('kidsTodoData', JSON.stringify(dataToSave));
+    }
+    
+    function loadFromLocalStorage() {
+        try {
+            const savedData = localStorage.getItem('kidsTodoData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                if (data.version === 1 && data.tasks && data.motherMessage !== undefined) {
+                    tasks = data.tasks;
+                    motherMessage = data.motherMessage;
+                    return true;
+                }
+            }
+        } catch (e) {
+            console.log('Error loading from localStorage:', e);
+        }
+        return false;
+    }
+    
+    let tasks = {
+        ruthie: [
+            { name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
+            { name: 'Get dressed', emoji: '👔', completed: { ruthie: false, lily: false, allie: false } },
+            { name: 'Eat breakfast', emoji: '🍳', completed: { ruthie: false, lily: false, allie: false } }
+        ],
+        lily: [
+            { name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
+            { name: 'Get dressed', emoji: '👔', completed: { ruthie: false, lily: false, allie: false } },
+            { name: 'Eat breakfast', emoji: '🍳', completed: { ruthie: false, lily: false, allie: false } }
+        ],
+        allie: [
+            { name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
+            { name: 'Get dressed', emoji: '👔', completed: { ruthie: false, lily: false, allie: false } },
+            { name: 'Eat breakfast', emoji: '🍳', completed: { ruthie: false, lily: false, allie: false } }
+        ]
+    };
+
+    // Mode switching
+    document.getElementById('todoModeBtn').addEventListener('click', () => {
+        currentMode = 'todo';
+        document.getElementById('todoModeBtn').className = 'mode-btn todo-mode';
+        document.getElementById('editModeBtn').className = 'mode-btn inactive';
+        document.getElementById('addTaskForm').classList.add('hidden');
+        document.getElementById('resetButtonContainer').classList.remove('hidden');
+        
+        // Message area - show display, hide textarea
+        document.getElementById('messageTextarea').classList.add('hidden');
+        document.getElementById('messageDisplay').classList.remove('hidden');
+        updateMessageDisplay();
+        
+        updateTableHeader();
+        renderTasks();
+    });
+
+    document.getElementById('editModeBtn').addEventListener('click', () => {
+        currentMode = 'edit';
+        document.getElementById('todoModeBtn').className = 'mode-btn inactive';
+        document.getElementById('editModeBtn').className = 'mode-btn edit-mode';
+        document.getElementById('addTaskForm').classList.remove('hidden');
+        document.getElementById('resetButtonContainer').classList.add('hidden');
+        
+        // Message area - show textarea, hide display
+        document.getElementById('messageTextarea').classList.remove('hidden');
+        document.getElementById('messageDisplay').classList.add('hidden');
+        document.getElementById('messageTextarea').value = motherMessage;
+        
+        updateTableHeader();
+        renderTasks();
+    });
+
+    function updateTableHeader() {
+        const headerRow = document.querySelector('.tasks-table thead tr');
+        // Remove existing actions header if it exists
+        const existingActionsHeader = headerRow.querySelector('.actions-header');
+        if (existingActionsHeader) {
+            existingActionsHeader.remove();
+        }
+
+        // Add actions header in edit mode
+        if (currentMode === 'edit') {
+            const actionsHeader = document.createElement('th');
+            actionsHeader.className = 'actions-header';
+            actionsHeader.textContent = 'Actions';
+            headerRow.appendChild(actionsHeader);
+        }
+    }
+
+    // Person tab switching
+    document.querySelectorAll('.person-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.person-tab').forEach(t => t.classList.remove('active'));
+            e.target.classList.add('active');
+            currentPerson = e.target.dataset.person;
+            renderTasks();
+        });
+    });
+
+    function renderTasks() {
+        const tasksList = document.getElementById('tasksList');
+        tasksList.innerHTML = '';
+
+        const personTasks = tasks[currentPerson];
+
+        personTasks.forEach((task, index) => {
+            const row = document.createElement('tr');
+            row.className = 'task-row';
+            
+
+            // Task name cell
+            const nameCell = document.createElement('td');
+            if (currentMode === 'edit') {
+                // In edit mode, show emoji picker and editable text
+                const emojiBtn = document.createElement('button');
+                emojiBtn.textContent = task.emoji || '📝';
+                emojiBtn.style.background = 'none';
+                emojiBtn.style.border = 'none';
+                emojiBtn.style.fontSize = '1.5em';
+                emojiBtn.style.cursor = 'pointer';
+                emojiBtn.style.marginRight = '10px';
+                emojiBtn.onclick = () => showEmojiPicker(index);
+                
+                const taskText = document.createElement('span');
+                taskText.textContent = task.name;
+                
+                nameCell.appendChild(emojiBtn);
+                nameCell.appendChild(taskText);
+            } else {
+                // In todo mode, show emoji and task name together
+                const emoji = task.emoji || '';
+                nameCell.textContent = emoji ? `${emoji} ${task.name}` : task.name;
+            }
+            row.appendChild(nameCell);
+
+            // Ruthie cell
+            const ruthieCell = document.createElement('td');
+            if (currentMode === 'todo') {
+                if (task.completed.ruthie === null) {
+                    ruthieCell.innerHTML = '<span style="color: #999; font-weight: bold;">N/A</span>';
+                } else {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'task-checkbox';
+                    checkbox.checked = task.completed.ruthie === true;
+                    checkbox.onchange = () => toggleTask(index, 'ruthie');
+                    ruthieCell.appendChild(checkbox);
+                }
+            } else {
+                const input = document.createElement('div');
+                input.className = 'task-input';
+                if (task.completed.ruthie === null) {
+                    input.className += ' na';
+                    input.textContent = 'N/A';
+                    input.style.background = '#999';
+                    input.style.color = 'white';
+                    input.style.borderColor = '#999';
+                } else if (task.completed.ruthie === true) {
+                    input.textContent = 'Yes';
+                    input.style.background = '#4caf50';
+                    input.style.color = 'white';
+                    input.style.borderColor = '#4caf50';
+                } else {
+                    input.textContent = 'No';
+                    input.style.background = '#f44336';
+                    input.style.color = 'white';
+                    input.style.borderColor = '#f44336';
+                }
+                input.onclick = () => cycleTaskStatus(index, 'ruthie');
+                ruthieCell.appendChild(input);
+            }
+            row.appendChild(ruthieCell);
+
+            // Lily cell
+            const lilyCell = document.createElement('td');
+            if (currentMode === 'todo') {
+                if (task.completed.lily === null) {
+                    lilyCell.innerHTML = '<span style="color: #999; font-weight: bold;">N/A</span>';
+                } else {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'task-checkbox';
+                    checkbox.checked = task.completed.lily === true;
+                    checkbox.onchange = () => toggleTask(index, 'lily');
+                    lilyCell.appendChild(checkbox);
+                }
+            } else {
+                const input = document.createElement('div');
+                input.className = 'task-input';
+                if (task.completed.lily === null) {
+                    input.className += ' na';
+                    input.textContent = 'N/A';
+                    input.style.background = '#999';
+                    input.style.color = 'white';
+                    input.style.borderColor = '#999';
+                } else if (task.completed.lily === true) {
+                    input.textContent = 'Yes';
+                    input.style.background = '#4caf50';
+                    input.style.color = 'white';
+                    input.style.borderColor = '#4caf50';
+                } else {
+                    input.textContent = 'No';
+                    input.style.background = '#f44336';
+                    input.style.color = 'white';
+                    input.style.borderColor = '#f44336';
+                }
+                input.onclick = () => cycleTaskStatus(index, 'lily');
+                lilyCell.appendChild(input);
+            }
+            row.appendChild(lilyCell);
+
+            // Allie cell
+            const allieCell = document.createElement('td');
+            if (currentMode === 'todo') {
+                if (task.completed.allie === null) {
+                    allieCell.innerHTML = '<span style="color: #999; font-weight: bold;">N/A</span>';
+                } else {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'task-checkbox';
+                    checkbox.checked = task.completed.allie === true;
+                    checkbox.onchange = () => toggleTask(index, 'allie');
+                    allieCell.appendChild(checkbox);
+                }
+            } else {
+                const input = document.createElement('div');
+                input.className = 'task-input';
+                if (task.completed.allie === null) {
+                    input.className += ' na';
+                    input.textContent = 'N/A';
+                    input.style.background = '#999';
+                    input.style.color = 'white';
+                    input.style.borderColor = '#999';
+                } else if (task.completed.allie === true) {
+                    input.textContent = 'Yes';
+                    input.style.background = '#4caf50';
+                    input.style.color = 'white';
+                    input.style.borderColor = '#4caf50';
+                } else {
+                    input.textContent = 'No';
+                    input.style.background = '#f44336';
+                    input.style.color = 'white';
+                    input.style.borderColor = '#f44336';
+                }
+                input.onclick = () => cycleTaskStatus(index, 'allie');
+                allieCell.appendChild(input);
+            }
+            row.appendChild(allieCell);
+
+            // Add action buttons for edit mode
+            if (currentMode === 'edit') {
+                const buttonCell = document.createElement('td');
+                
+                // Up arrow button
+                const upBtn = document.createElement('button');
+                upBtn.className = 'btn btn-move';
+                upBtn.textContent = '↑';
+                upBtn.onclick = () => moveTaskUp(index);
+                upBtn.disabled = index === 0;
+                upBtn.style.marginRight = '3px';
+                
+                // Down arrow button
+                const downBtn = document.createElement('button');
+                downBtn.className = 'btn btn-move';
+                downBtn.textContent = '↓';
+                downBtn.onclick = () => moveTaskDown(index);
+                downBtn.disabled = index === personTasks.length - 1;
+                downBtn.style.marginRight = '5px';
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-edit';
+                editBtn.textContent = 'Edit';
+                editBtn.onclick = () => editTask(index);
+                editBtn.style.marginRight = '3px';
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-delete';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => deleteTask(index);
+
+                buttonCell.appendChild(upBtn);
+                buttonCell.appendChild(downBtn);
+                buttonCell.appendChild(editBtn);
+                buttonCell.appendChild(deleteBtn);
+                row.appendChild(buttonCell);
+            }
+
+            tasksList.appendChild(row);
+        });
+    }
+
+    function addTask() {
+        const input = document.getElementById('newTaskInput');
+        const taskName = input.value.trim();
+
+        if (taskName) {
+            const newTask = {
+                name: taskName,
+                emoji: '📝', // Default emoji
+                completed: { ruthie: false, lily: false, allie: false }
+            };
+
+            // Add to all people's lists
+            Object.keys(tasks).forEach(person => {
+                tasks[person].push({...newTask});
+            });
+
+            input.value = '';
+            renderTasks();
+            saveToLocalStorage();
+        }
+    }
+
+    function editTask(index) {
+        const newName = prompt('Edit task name:', tasks[currentPerson][index].name);
+        if (newName && newName.trim()) {
+            // Update task name for all people
+            Object.keys(tasks).forEach(person => {
+                if (tasks[person][index]) {
+                    tasks[person][index].name = newName.trim();
+                }
+            });
+            renderTasks();
+            saveToLocalStorage();
+        }
+    }
+
+    function deleteTask(index) {
+        if (confirm('Are you sure you want to delete this task?')) {
+            // Delete from all people's lists
+            Object.keys(tasks).forEach(person => {
+                tasks[person].splice(index, 1);
+            });
+            renderTasks();
+            saveToLocalStorage();
+        }
+    }
+
+    function toggleTask(index, person) {
+        // Toggle completion status for the specific person on all task lists
+        Object.keys(tasks).forEach(taskPerson => {
+            if (tasks[taskPerson][index]) {
+                tasks[taskPerson][index].completed[person] = !tasks[taskPerson][index].completed[person];
+            }
+        });
+        renderTasks();
+        saveToLocalStorage();
+    }
+
+    function cycleTaskStatus(index, person) {
+        // Cycle through: No -> Yes -> N/A (for applicable people) -> No
+        Object.keys(tasks).forEach(taskPerson => {
+            if (tasks[taskPerson][index]) {
+                const currentStatus = tasks[taskPerson][index].completed[person];
+
+                if (currentStatus === false) {
+                    // No -> Yes
+                    tasks[taskPerson][index].completed[person] = true;
+                } else if (currentStatus === true) {
+                    // Yes -> N/A (mark as null to indicate not applicable)
+                    tasks[taskPerson][index].completed[person] = null;
+                } else {
+                    // N/A -> No
+                    tasks[taskPerson][index].completed[person] = false;
+                }
+            }
+        });
+        renderTasks();
+        saveToLocalStorage();
+    }
+
+    function resetAllTasks() {
+        if (confirm('Are you sure you want to reset all tasks? This will uncheck all checkboxes and clear the message.')) {
+            // Reset all tasks to unchecked, but preserve N/A status
+            Object.keys(tasks).forEach(person => {
+                tasks[person].forEach(task => {
+                    Object.keys(task.completed).forEach(kidName => {
+                        if (task.completed[kidName] !== null) {
+                            task.completed[kidName] = false;
+                        }
+                    });
+                });
+            });
+            
+            // Clear mother's message
+            motherMessage = "";
+            updateMessageDisplay();
+            
+            renderTasks();
+            saveToLocalStorage();
+        }
+    }
+
+    function reorderTasks(fromIndex, toIndex) {
+        // Reorder tasks in all person arrays to maintain consistency
+        Object.keys(tasks).forEach(person => {
+            const taskArray = tasks[person];
+            const [movedTask] = taskArray.splice(fromIndex, 1);
+            taskArray.splice(toIndex, 0, movedTask);
+        });
+        
+        // Re-render the tasks to reflect the new order
+        renderTasks();
+        saveToLocalStorage();
+    }
+
+    function moveTaskUp(index) {
+        if (index > 0) {
+            reorderTasks(index, index - 1);
+        }
+    }
+
+    function moveTaskDown(index) {
+        const taskCount = tasks[currentPerson].length;
+        if (index < taskCount - 1) {
+            reorderTasks(index, index + 1);
+        }
+    }
+
+
+    function showEmojiPicker(taskIndex) {
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'emoji-overlay';
+        
+        // Create picker
+        const picker = document.createElement('div');
+        picker.className = 'emoji-picker';
+        
+        // Create close button
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'emoji-close-btn';
+        closeBtn.textContent = '✕';
+        closeBtn.style.position = 'fixed';
+        closeBtn.style.top = '20px';
+        closeBtn.style.right = '20px';
+        closeBtn.style.zIndex = '1001';
+        
+        const closePicker = () => {
+            document.body.removeChild(overlay);
+            document.body.removeChild(picker);
+            document.body.removeChild(closeBtn);
+        };
+        
+        closeBtn.onclick = closePicker;
+        overlay.onclick = closePicker;
+        
+        // Comprehensive task emojis
+        const emojis = [
+            // Personal care & hygiene
+            '🦷', '🪥', '🧼', '🚿', '🛁', '🧴', '🪒', '💄', '🧻', '🪞', '🪮', '💧',
+            
+            // Clothing & shoes
+            '👕', '👔', '🧥', '👗', '👚', '🩳', '👖', '🧦', '👠', '👟', '🥿', '🩴',
+            
+            // Food & meals
+            '🍳', '🥞', '🍞', '🥐', '🍎', '🍌', '🥛', '☕', '🥤', '🧴', '🍱', '🍽️', '🥄', '🍴',
+            
+            // School & homework
+            '📚', '✏️', '🎒', '📝', '📖', '🖊️', '📐', '🧮', '💻', '🖥️',
+            
+            // Chores & cleaning
+            '🧽', '🧹', '🧺', '👕', '🛏️', '🗑️', '♻️', '🧴', '🪣', '🧤',
+            
+            // Pets & animals
+            '🐶', '🐱', '🐹', '🐰', '🐠', '🐟', '🦎', '🐢', '🐦', '🪶',
+            
+            // Activities & play
+            '🧸', '🎮', '⚽', '🏃', '🚴', '🛴', '🏊', '🎨', '🎵', '📺',
+            
+            // Sleep & bedtime
+            '😴', '🛏️', '🌙', '⭐', '🌟', '💤', '🕘', '⏰', '🧸', '📚',
+            
+            // General & misc
+            '🌈', '🌞', '❤️', '✨', '⚡', '🔥', '💎', '🎁', '🎈', '🎊'
+        ];
+        
+        emojis.forEach(emoji => {
+            const btn = document.createElement('button');
+            btn.className = 'emoji-option';
+            btn.textContent = emoji;
+            btn.onclick = () => {
+                // Update emoji for this task across all people
+                Object.keys(tasks).forEach(person => {
+                    if (tasks[person][taskIndex]) {
+                        tasks[person][taskIndex].emoji = emoji;
+                    }
+                });
+                renderTasks();
+                saveToLocalStorage();
+                closePicker();
+            };
+            picker.appendChild(btn);
+        });
+        
+        // Add elements to DOM
+        document.body.appendChild(overlay);
+        document.body.appendChild(picker);
+        document.body.appendChild(closeBtn);
+    }
+
+    function updateMessage() {
+        motherMessage = document.getElementById('messageTextarea').value;
+        saveToLocalStorage();
+    }
+    
+    function updateMessageDisplay() {
+        document.getElementById('messageDisplay').textContent = motherMessage;
+    }
+
+    // Load saved data or use defaults
+    if (!loadFromLocalStorage()) {
+        // No saved data, save the default data
+        saveToLocalStorage();
+    }
+    
+    // Initial render - start in todo mode
+    document.getElementById('resetButtonContainer').classList.remove('hidden');
+    updateTableHeader();
+    renderTasks();
+    updateMessageDisplay();
+</script>
+</body>
+</html>
