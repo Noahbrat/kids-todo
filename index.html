@@ -1698,10 +1698,6 @@
         updateMessage();
     }
 
-    function showSampleInfo() {
-        // This function is for the info button - currently disabled
-        // Could show a tooltip or alert explaining this is a sample message
-    }
 
     function renderMessageHistory() {
         const historyList = document.getElementById('messageHistoryList');
@@ -1726,9 +1722,6 @@
                     <div class="history-actions">
                         <button class="history-btn history-btn-load" onclick="loadSampleMessage()" title="Load this sample message">
                             Load
-                        </button>
-                        <button class="history-btn history-btn-info" onclick="showSampleInfo()" title="This is a sample message" disabled style="background: #999; cursor: not-allowed;">
-                            💡
                         </button>
                     </div>
                 </div>
