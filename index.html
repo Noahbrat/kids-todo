@@ -1464,7 +1464,15 @@
 
     function cycleTaskStatus(index, person) {
         // Cycle through: No -> Yes -> N/A -> No
-        const currentStatus = tasks[currentPerson][index]?.completed[person];
+        
+        // Get current status from the first available task list (they should all be identical)
+        const firstPersonTasks = Object.values(tasks)[0];
+        if (!firstPersonTasks || !firstPersonTasks[index]) {
+            console.error(`Task ${index} not found in tasks array`);
+            return;
+        }
+        
+        const currentStatus = firstPersonTasks[index].completed[person];
         
         let newStatus;
         if (currentStatus === false) {
