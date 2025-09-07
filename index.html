@@ -488,6 +488,122 @@
         .hidden {
             display: none;
         }
+
+        /* Mobile responsive design for iPhone portrait */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .header {
+                gap: 10px;
+            }
+
+            .sync-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .sync-icon {
+                font-size: 1em;
+            }
+
+            .mode-buttons {
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .mode-btn {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            .tasks-table th {
+                padding: 5px 2px;
+                font-size: 0.9em;
+                padding-bottom: 10px;
+            }
+
+            .tasks-table td {
+                padding: 8px 2px;
+                font-size: 0.9em;
+            }
+
+            .tasks-table td:first-child {
+                font-size: 1em;
+                min-width: auto;
+                padding-left: 5px;
+            }
+
+            .task-checkbox {
+                width: 20px;
+                height: 20px;
+                transform: scale(1.5);
+            }
+
+            .task-input {
+                padding: 4px 8px;
+                font-size: 0.8em;
+            }
+
+            .btn {
+                padding: 4px 8px;
+                font-size: 0.7em;
+                margin: 1px;
+            }
+
+            .btn-move {
+                min-width: 20px;
+                font-size: 0.8em;
+            }
+
+            .add-task-form {
+                padding: 15px;
+                gap: 8px;
+            }
+
+            .add-task-input {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            .add-task-btn {
+                padding: 8px 20px;
+                font-size: 0.9em;
+            }
+
+            .message-area {
+                margin-top: 20px;
+                padding: 15px;
+            }
+
+            .message-textarea {
+                min-height: 80px;
+                font-size: 0.9em;
+            }
+
+            .emoji-picker {
+                padding: 40px 20px 80px 20px;
+                grid-template-columns: repeat(8, 1fr);
+                gap: 15px;
+            }
+
+            .emoji-option {
+                font-size: 1.5em;
+                width: 40px;
+                height: 40px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -508,7 +624,7 @@
 <table class="tasks-table" id="tasksTable">
         <thead>
             <tr>
-                <th></th>
+                <th id="dayHeader"></th>
                 <th>Ruthie</th>
                 <th>Lily</th>
                 <th>Allie</th>
@@ -1280,6 +1396,22 @@
         document.getElementById('messageDisplay').textContent = motherMessage;
     }
 
+    function updateDayOfWeek() {
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const now = new Date();
+        
+        // If it's past noon (12 PM), show tomorrow's day
+        if (now.getHours() >= 12) {
+            const tomorrow = new Date(now);
+            tomorrow.setDate(now.getDate() + 1);
+            const dayName = days[tomorrow.getDay()];
+            document.getElementById('dayHeader').textContent = dayName;
+        } else {
+            const dayName = days[now.getDay()];
+            document.getElementById('dayHeader').textContent = dayName;
+        }
+    }
+
     // Initialize app with cloud storage
     async function initializeApp() {
         const loaded = await loadFromCloud();
@@ -1293,6 +1425,7 @@
         updateTableHeader();
         renderTasks();
         updateMessageDisplay();
+        updateDayOfWeek();
     }
 
     // Start the app
