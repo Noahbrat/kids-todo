@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Morning Todo List</title>
-    
+
     <!-- iOS Web App Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -489,8 +489,8 @@
             <span>💝</span>
             <span>Message from Mom</span>
         </div>
-        <textarea 
-            class="message-textarea hidden" 
+        <textarea
+            class="message-textarea hidden"
             id="messageTextarea"
             placeholder="Write a loving message, reminder, or encouragement for your kids... ❤️"
             oninput="updateMessage()"
@@ -504,7 +504,7 @@
     let currentPerson = 'ruthie';
     let isDragging = false;
     let motherMessage = "Good morning, my beautiful children! Remember to be kind to each other and have a wonderful day! ❤️";
-    
+
     // Cloud Storage Configuration
     // SETUP INSTRUCTIONS:
     // 1. Go to https://jsonbin.io/ and create a free account
@@ -512,9 +512,9 @@
     // 3. Replace 'YOUR_API_KEY_HERE' with your actual API key (starts with $2a$10$...)
     // 4. The BIN_ID will be generated automatically on first save (check browser console)
     // 5. After first save, update 'YOUR_BIN_ID_HERE' with the generated bin ID
-    const JSONBIN_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your JSONBin.io API key
-    const JSONBIN_BIN_ID = 'YOUR_BIN_ID_HERE';   // Replace with your bin ID (created automatically)
-    
+    const JSONBIN_API_KEY = '$2a$10$JdAR5y9.ot1plNIuHaLK..qlGzNWe.eJrswT1tvQ.WclT64bzMOA.'; // Replace with your JSONBin.io API key
+    const JSONBIN_BIN_ID = '68bde42fd0ea881f40753f63';   // Replace with your bin ID (created automatically)
+
     // Cloud Storage Functions
     async function saveToCloud() {
         const dataToSave = {
@@ -523,11 +523,11 @@
             motherMessage: motherMessage,
             lastUpdated: new Date().toISOString()
         };
-        
+
         try {
             // Show loading state
             setLoadingState(true, 'Saving...');
-            
+
             // First try: Create or update the bin
             let response;
             if (JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE') {
@@ -540,7 +540,7 @@
                     },
                     body: JSON.stringify(dataToSave)
                 });
-                
+
                 if (response.ok) {
                     const result = await response.json();
                     // You'll need to manually update JSONBIN_BIN_ID with the returned ID
@@ -557,19 +557,19 @@
                     },
                     body: JSON.stringify(dataToSave)
                 });
-                
+
                 if (response.ok) {
                     showMessage('Data saved to cloud!', 'success');
                 }
             }
-            
+
             if (!response.ok) {
                 throw new Error(`Cloud save failed: ${response.status}`);
             }
-            
+
             // Also save to localStorage as backup
             saveToLocalStorage(dataToSave);
-            
+
         } catch (error) {
             console.error('Cloud save error:', error);
             // Fall back to localStorage
@@ -579,27 +579,27 @@
             setLoadingState(false);
         }
     }
-    
+
     async function loadFromCloud() {
         try {
             setLoadingState(true, 'Loading...');
-            
+
             if (JSONBIN_API_KEY === 'YOUR_API_KEY_HERE' || JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE') {
                 // API not configured, use localStorage
                 return loadFromLocalStorage();
             }
-            
+
             const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
                 method: 'GET',
                 headers: {
                     'X-Master-Key': JSONBIN_API_KEY
                 }
             });
-            
+
             if (response.ok) {
                 const result = await response.json();
                 const data = result.record;
-                
+
                 if (data.version === 1 && data.tasks && data.motherMessage !== undefined) {
                     tasks = data.tasks;
                     motherMessage = data.motherMessage;
@@ -620,10 +620,10 @@
         } finally {
             setLoadingState(false);
         }
-        
+
         return false;
     }
-    
+
     // localStorage backup functions
     function saveToLocalStorage(dataToSave = null) {
         if (!dataToSave) {
@@ -635,7 +635,7 @@
         }
         localStorage.setItem('kidsTodoData', JSON.stringify(dataToSave));
     }
-    
+
     function loadFromLocalStorage() {
         try {
             const savedData = localStorage.getItem('kidsTodoData');
@@ -652,7 +652,7 @@
         }
         return false;
     }
-    
+
     // UI feedback functions
     function setLoadingState(loading, message = '') {
         const container = document.querySelector('.container');
@@ -665,14 +665,14 @@
             container.style.opacity = '1';
         }
     }
-    
+
     function showMessage(text, type = 'info') {
         // Remove existing messages
         const existingMessage = document.querySelector('.toast-message');
         if (existingMessage) {
             existingMessage.remove();
         }
-        
+
         const message = document.createElement('div');
         message.className = `toast-message toast-${type}`;
         message.textContent = text;
@@ -690,9 +690,9 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         `;
-        
+
         document.body.appendChild(message);
-        
+
         // Auto-remove after 3 seconds
         setTimeout(() => {
             if (message.parentNode) {
@@ -702,7 +702,7 @@
             }
         }, 3000);
     }
-    
+
     let tasks = {
         ruthie: [
             { name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
@@ -728,12 +728,12 @@
         document.getElementById('editModeBtn').className = 'mode-btn inactive';
         document.getElementById('addTaskForm').classList.add('hidden');
         document.getElementById('resetButtonContainer').classList.remove('hidden');
-        
+
         // Message area - show display, hide textarea
         document.getElementById('messageTextarea').classList.add('hidden');
         document.getElementById('messageDisplay').classList.remove('hidden');
         updateMessageDisplay();
-        
+
         updateTableHeader();
         renderTasks();
     });
@@ -744,12 +744,12 @@
         document.getElementById('editModeBtn').className = 'mode-btn edit-mode';
         document.getElementById('addTaskForm').classList.remove('hidden');
         document.getElementById('resetButtonContainer').classList.add('hidden');
-        
+
         // Message area - show textarea, hide display
         document.getElementById('messageTextarea').classList.remove('hidden');
         document.getElementById('messageDisplay').classList.add('hidden');
         document.getElementById('messageTextarea').value = motherMessage;
-        
+
         updateTableHeader();
         renderTasks();
     });
@@ -790,7 +790,7 @@
         personTasks.forEach((task, index) => {
             const row = document.createElement('tr');
             row.className = 'task-row';
-            
+
 
             // Task name cell
             const nameCell = document.createElement('td');
@@ -804,10 +804,10 @@
                 emojiBtn.style.cursor = 'pointer';
                 emojiBtn.style.marginRight = '10px';
                 emojiBtn.onclick = () => showEmojiPicker(index);
-                
+
                 const taskText = document.createElement('span');
                 taskText.textContent = task.name;
-                
+
                 nameCell.appendChild(emojiBtn);
                 nameCell.appendChild(taskText);
             } else {
@@ -934,7 +934,7 @@
             // Add action buttons for edit mode
             if (currentMode === 'edit') {
                 const buttonCell = document.createElement('td');
-                
+
                 // Up arrow button
                 const upBtn = document.createElement('button');
                 upBtn.className = 'btn btn-move';
@@ -942,7 +942,7 @@
                 upBtn.onclick = () => moveTaskUp(index);
                 upBtn.disabled = index === 0;
                 upBtn.style.marginRight = '3px';
-                
+
                 // Down arrow button
                 const downBtn = document.createElement('button');
                 downBtn.className = 'btn btn-move';
@@ -1065,11 +1065,11 @@
                     });
                 });
             });
-            
+
             // Clear mother's message
             motherMessage = "";
             updateMessageDisplay();
-            
+
             renderTasks();
             saveToCloud();
         }
@@ -1082,7 +1082,7 @@
             const [movedTask] = taskArray.splice(fromIndex, 1);
             taskArray.splice(toIndex, 0, movedTask);
         });
-        
+
         // Re-render the tasks to reflect the new order
         renderTasks();
         saveToCloud();
@@ -1106,11 +1106,11 @@
         // Create overlay
         const overlay = document.createElement('div');
         overlay.className = 'emoji-overlay';
-        
+
         // Create picker
         const picker = document.createElement('div');
         picker.className = 'emoji-picker';
-        
+
         // Create close button
         const closeBtn = document.createElement('button');
         closeBtn.className = 'emoji-close-btn';
@@ -1119,46 +1119,46 @@
         closeBtn.style.top = '20px';
         closeBtn.style.right = '20px';
         closeBtn.style.zIndex = '1001';
-        
+
         const closePicker = () => {
             document.body.removeChild(overlay);
             document.body.removeChild(picker);
             document.body.removeChild(closeBtn);
         };
-        
+
         closeBtn.onclick = closePicker;
         overlay.onclick = closePicker;
-        
+
         // Comprehensive task emojis
         const emojis = [
             // Personal care & hygiene
             '🦷', '🪥', '🧼', '🚿', '🛁', '🧴', '🪒', '💄', '🧻', '🪞', '🪮', '💧',
-            
+
             // Clothing & shoes
             '👕', '👔', '🧥', '👗', '👚', '🩳', '👖', '🧦', '👠', '👟', '🥿', '🩴',
-            
+
             // Food & meals
             '🍳', '🥞', '🍞', '🥐', '🍎', '🍌', '🥛', '☕', '🥤', '🧴', '🍱', '🍽️', '🥄', '🍴',
-            
+
             // School & homework
             '📚', '✏️', '🎒', '📝', '📖', '🖊️', '📐', '🧮', '💻', '🖥️',
-            
+
             // Chores & cleaning
             '🧽', '🧹', '🧺', '👕', '🛏️', '🗑️', '♻️', '🧴', '🪣', '🧤',
-            
+
             // Pets & animals
             '🐶', '🐱', '🐹', '🐰', '🐠', '🐟', '🦎', '🐢', '🐦', '🪶',
-            
+
             // Activities & play
             '🧸', '🎮', '⚽', '🏃', '🚴', '🛴', '🏊', '🎨', '🎵', '📺',
-            
+
             // Sleep & bedtime
             '😴', '🛏️', '🌙', '⭐', '🌟', '💤', '🕘', '⏰', '🧸', '📚',
-            
+
             // General & misc
             '🌈', '🌞', '❤️', '✨', '⚡', '🔥', '💎', '🎁', '🎈', '🎊'
         ];
-        
+
         emojis.forEach(emoji => {
             const btn = document.createElement('button');
             btn.className = 'emoji-option';
@@ -1176,7 +1176,7 @@
             };
             picker.appendChild(btn);
         });
-        
+
         // Add elements to DOM
         document.body.appendChild(overlay);
         document.body.appendChild(picker);
@@ -1187,7 +1187,7 @@
         motherMessage = document.getElementById('messageTextarea').value;
         saveToCloud();
     }
-    
+
     function updateMessageDisplay() {
         document.getElementById('messageDisplay').textContent = motherMessage;
     }
@@ -1199,14 +1199,14 @@
             // No saved data, save the default data to cloud
             await saveToCloud();
         }
-        
+
         // Initial render - start in todo mode
         document.getElementById('resetButtonContainer').classList.remove('hidden');
         updateTableHeader();
         renderTasks();
         updateMessageDisplay();
     }
-    
+
     // Start the app
     initializeApp();
 </script>
