@@ -833,12 +833,6 @@
         document.getElementById('messageDisplay').classList.add('hidden');
         document.getElementById('messageTextarea').value = motherMessage;
 
-        // iOS keyboard fix - delay focus to ensure textarea is visible
-        setTimeout(() => {
-            const textarea = document.getElementById('messageTextarea');
-            textarea.focus();
-        }, 100);
-
         updateTableHeader();
         renderTasks();
     });
