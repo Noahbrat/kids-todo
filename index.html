@@ -1325,71 +1325,68 @@
         }
     }
 
-    // Migration and Setup Functions
+    // Migration and Setup Functions (Fixed to not trigger for properly configured data)
     function needsMigration(data) {
-        return !data.migrated || !data.children || data.children.length === 0;
-    }
-
-    function extractChildrenFromTasks(tasks) {
-        // Extract child IDs from existing task structure
-        const childIds = Object.keys(tasks || {});
-        return childIds.map(id => ({
-            id: id,
-            name: capitalizeFirst(id),
-            shortName: id === 'ruthie' ? 'Ruth' : capitalizeFirst(id)
-        }));
-    }
-
-    function capitalizeFirst(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
+        // Only migrate if data truly lacks proper structure
+        // FIXED: More strict checking to avoid false positives
+        if (!data) return true;                              // No data at all
+        if (data.migrated === true && 
+            data.children && 
+            data.children.length > 0 && 
+            data.tasks && 
+            Object.keys(data.tasks).length > 0) {
+            return false; // Data is properly configured, no migration needed
+        }
+        return true; // Needs migration
     }
 
     async function checkAndMigrate() {
         try {
             const loaded = await loadFromCloud();
-            const savedData = localStorage.getItem('kidsTodoData');
             
-            let needsSetup = false;
-            
-            if (loaded || savedData) {
-                // We have existing data, check if it needs migration
-                let data = null;
-                if (savedData) {
-                    try {
-                        data = JSON.parse(savedData);
-                    } catch (e) {
-                        console.log('Error parsing localStorage data:', e);
-                    }
+            if (loaded) {
+                // We have existing cloud data, check if the loaded data itself is properly configured
+                // If the children array has the expected children, skip setup
+                if (familyChildren && familyChildren.length > 0 && 
+                    familyChildren.includes('Ruthie') && familyChildren.includes('Lily') && familyChildren.includes('Allie') &&
+                    tasks && Object.keys(tasks).length > 5) { // User has substantial task data
+                    // This is properly configured data, no setup needed
+                    console.log('Found properly configured family data, skipping setup wizard');
+                    hideSetupWizard();
+                    return false;
                 }
                 
-                if (data && needsMigration(data)) {
-                    // Extract children from existing tasks
-                    const extractedChildren = extractChildrenFromTasks(data.tasks);
-                    if (extractedChildren.length > 0) {
-                        // Pre-populate setup wizard with existing children
-                        showSetupWizard(extractedChildren);
-                        return true; // Return true to indicate setup is needed
-                    } else {
-                        needsSetup = true;
-                    }
+                // For other families with different configurations, also check for proper structure
+                if (familyChildren && familyChildren.length > 0 && tasks && Object.keys(tasks).length > 0) {
+                    console.log('Found configured family data with different children, skipping setup wizard');
+                    hideSetupWizard();
+                    return false;
                 }
-            } else {
-                // No existing data, show setup wizard
-                needsSetup = true;
             }
             
-            if (needsSetup) {
-                showSetupWizard();
-                return true;
+            // Check localStorage as fallback
+            const savedData = localStorage.getItem('kidsTodoData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    if (!needsMigration(data)) {
+                        // Load from localStorage
+                        familyChildren = data.children || familyChildren;
+                        return false;
+                    }
+                } catch (e) {
+                    console.log('Error parsing localStorage data:', e);
+                }
             }
             
-            return false; // No setup needed
+            // Show setup wizard for new families
+            showSetupWizard();
+            return true;
             
         } catch (error) {
             console.error('Migration check error:', error);
-            // If there's an error, show setup wizard as fallback
-            showSetupWizard();
-            return true;
+            // For errors, don't show setup wizard - just proceed normally
+            return false;
         }
     }
 
@@ -1400,7 +1397,7 @@
         // Clear existing inputs
         setupArea.innerHTML = '';
         
-        // Use existing children or defaults
+        // Use existing children or defaults for new families
         const childrenToShow = existingChildren || [
             { name: "Child 1", shortName: "C1", id: "child1" },
             { name: "Child 2", shortName: "C2", id: "child2" },
@@ -1422,6 +1419,11 @@
                 firstInput.focus();
             }
         }, 300);
+    }
+
+    function hideSetupWizard() {
+        const overlay = document.getElementById('setupOverlay');
+        overlay.classList.remove('active');
     }
 
     function addChildInput() {
@@ -1509,7 +1511,7 @@
     }
 
     function skipSetup() {
-        // Use default children
+        // Use default children for new families
         familyChildren = [
             { name: "Ruthie", shortName: "Ruth", id: "ruthie" },
             { name: "Lily", shortName: "Lily", id: "lily" }, 
