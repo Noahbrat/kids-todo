@@ -30,7 +30,7 @@ let familyChildren = [
 // Cloud Storage Functions
 async function saveToCloud() {
     const dataToSave = {
-        version: 1,
+        version: Array.isArray(tasks) ? 2 : 1, // Use v2 if tasks is already an array
         tasks: tasks,
         motherMessage: motherMessage,
         messageHistory: messageHistory,
@@ -120,15 +120,27 @@ async function loadFromCloud() {
                 return false;
             }
 
-            if (data.version === 1 && data.tasks && data.motherMessage !== undefined) {
-                tasks = data.tasks;
-                motherMessage = data.motherMessage;
-                messageHistory = data.messageHistory || [];
-                celebratedToday = data.celebratedToday || {};
+            if ((data.version === 1 || data.version === 2) && data.tasks && data.motherMessage !== undefined) {
+                // Handle data migration if needed
+                let processedData = data;
+                if (isV1Format(data)) {
+                    console.log('🔄 Detected v1 format - migrating to v2...');
+                    processedData = migrateV1ToV2(data);
+                    // Auto-save the migrated data back to cloud
+                    setTimeout(() => {
+                        console.log('💾 Auto-saving migrated v2 data to cloud...');
+                        saveToCloud();
+                    }, 1000);
+                }
+                
+                tasks = processedData.tasks;
+                motherMessage = processedData.motherMessage;
+                messageHistory = processedData.messageHistory || [];
+                celebratedToday = processedData.celebratedToday || {};
                 
                 // Load children if available
-                if (data.children && data.children.length > 0) {
-                    familyChildren = data.children;
+                if (processedData.children && processedData.children.length > 0) {
+                    familyChildren = processedData.children;
                 }
                 
                 showMessage('Data loaded from cloud!', 'success');
@@ -620,15 +632,24 @@ function loadFromLocalStorage() {
         const savedData = localStorage.getItem('kidsTodoData');
         if (savedData) {
             const data = JSON.parse(savedData);
-            if (data.version === 1 && data.tasks && data.motherMessage !== undefined) {
-                tasks = data.tasks;
-                motherMessage = data.motherMessage;
-                messageHistory = data.messageHistory || [];
-                celebratedToday = data.celebratedToday || {};
+            if ((data.version === 1 || data.version === 2) && data.tasks && data.motherMessage !== undefined) {
+                // Handle data migration if needed
+                let processedData = data;
+                if (isV1Format(data)) {
+                    console.log('🔄 Migrating localStorage from v1 to v2...');
+                    processedData = migrateV1ToV2(data);
+                    // Auto-save the migrated data back to localStorage
+                    saveToLocalStorage(processedData);
+                }
+                
+                tasks = processedData.tasks;
+                motherMessage = processedData.motherMessage;
+                messageHistory = processedData.messageHistory || [];
+                celebratedToday = processedData.celebratedToday || {};
                 
                 // Load children if available
-                if (data.children && data.children.length > 0) {
-                    familyChildren = data.children;
+                if (processedData.children && processedData.children.length > 0) {
+                    familyChildren = processedData.children;
                 }
                 
                 return true;
@@ -690,6 +711,117 @@ function showMessage(text, type = 'info') {
     }, 3000);
 }
 
+// Data Structure Migration Functions
+function migrateV1ToV2(v1Data) {
+    console.log('🔄 Migrating data from v1 (redundant) to v2 (efficient) format...');
+    
+    // Extract unique tasks from the first child's list (they're all identical anyway)
+    const firstChildKey = Object.keys(v1Data.tasks)[0];
+    const uniqueTasks = v1Data.tasks[firstChildKey] || [];
+    
+    // Convert to v2 format: single task list with IDs
+    const v2Tasks = uniqueTasks.map((task, index) => ({
+        id: generateTaskId(task.name),
+        name: task.name,
+        emoji: task.emoji,
+        completed: task.completed
+    }));
+    
+    const v2Data = {
+        ...v1Data,
+        version: 2,
+        tasks: v2Tasks
+    };
+    
+    console.log(`✅ Migration complete: ${uniqueTasks.length} tasks converted from redundant to efficient format`);
+    return v2Data;
+}
+
+function generateTaskId(taskName) {
+    // Create a stable ID from task name
+    return taskName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '') // Remove special chars
+        .replace(/\s+/g, '-') // Replace spaces with dashes
+        .substring(0, 30); // Limit length
+}
+
+function isV1Format(data) {
+    return data.version === 1 && data.tasks && typeof data.tasks === 'object' && 
+           Object.keys(data.tasks).some(key => Array.isArray(data.tasks[key]));
+}
+
+function isV2Format(data) {
+    return data.version === 2 && Array.isArray(data.tasks);
+}
+
+// Task access wrapper functions for v1/v2 compatibility
+function getTasksForPerson(personId) {
+    if (Array.isArray(tasks)) {
+        // v2 format: return all tasks (they're shared)
+        return tasks;
+    } else {
+        // v1 format: return person-specific array
+        return tasks[personId] || [];
+    }
+}
+
+function getAllTasks() {
+    if (Array.isArray(tasks)) {
+        // v2 format: tasks is already the array
+        return tasks;
+    } else {
+        // v1 format: get from first child (they're all identical)
+        const firstChild = familyChildren[0];
+        return firstChild ? tasks[firstChild.id] || [] : [];
+    }
+}
+
+function updateTaskForAllChildren(taskIndex, updateFn) {
+    if (Array.isArray(tasks)) {
+        // v2 format: update the single shared task
+        if (tasks[taskIndex]) {
+            updateFn(tasks[taskIndex]);
+        }
+    } else {
+        // v1 format: update task in each child's array
+        familyChildren.forEach(child => {
+            if (tasks[child.id] && tasks[child.id][taskIndex]) {
+                updateFn(tasks[child.id][taskIndex]);
+            }
+        });
+    }
+}
+
+function addTaskToAllChildren(newTask) {
+    if (Array.isArray(tasks)) {
+        // v2 format: add to shared array
+        tasks.push(newTask);
+    } else {
+        // v1 format: add to each child's array
+        familyChildren.forEach(child => {
+            if (tasks[child.id]) {
+                tasks[child.id].push({...newTask});
+            }
+        });
+    }
+}
+
+function removeTaskFromAllChildren(taskIndex) {
+    if (Array.isArray(tasks)) {
+        // v2 format: remove from shared array
+        tasks.splice(taskIndex, 1);
+    } else {
+        // v1 format: remove from each child's array
+        familyChildren.forEach(child => {
+            if (tasks[child.id]) {
+                tasks[child.id].splice(taskIndex, 1);
+            }
+        });
+    }
+}
+
+// Initialize with v1 format for backward compatibility
 let tasks = {
     ruthie: [
         { name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
@@ -715,7 +847,7 @@ function checkForCompletion(person) {
         return false;
     }
 
-    const personTasks = tasks[person] || [];
+    const personTasks = getTasksForPerson(person);
 
     // Check if all applicable tasks (non-null) are completed
     let applicableTasks = 0;
@@ -866,8 +998,8 @@ function renderTasks() {
     const tasksList = document.getElementById('tasksList');
     tasksList.innerHTML = '';
 
-    const personTasks = tasks[currentPerson];
-    if (!personTasks) {
+    const personTasks = getTasksForPerson(currentPerson);
+    if (!personTasks || personTasks.length === 0) {
         console.warn(`No tasks found for person: ${currentPerson}`);
         return;
     }
@@ -1005,11 +1137,7 @@ function addTask() {
         };
 
         // Add to all people's lists
-        familyChildren.forEach(child => {
-            if (tasks[child.id]) {
-                tasks[child.id].push({...newTask});
-            }
-        });
+        addTaskToAllChildren(newTask);
 
         input.value = '';
 
@@ -1020,13 +1148,12 @@ function addTask() {
 }
 
 function editTask(index) {
-    const newName = prompt('Edit task name:', tasks[currentPerson][index].name);
+    const currentTasks = getTasksForPerson(currentPerson);
+    const newName = prompt('Edit task name:', currentTasks[index].name);
     if (newName && newName.trim()) {
         // Update task name for all people
-        familyChildren.forEach(child => {
-            if (tasks[child.id] && tasks[child.id][index]) {
-                tasks[child.id][index].name = newName.trim();
-            }
+        updateTaskForAllChildren(index, (task) => {
+            task.name = newName.trim();
         });
         renderTasks();
         saveToCloud();
@@ -1036,11 +1163,7 @@ function editTask(index) {
 function deleteTask(index) {
     if (confirm('Are you sure you want to delete this task?')) {
         // Delete from all people's lists
-        familyChildren.forEach(child => {
-            if (tasks[child.id]) {
-                tasks[child.id].splice(index, 1);
-            }
-        });
+        removeTaskFromAllChildren(index);
         renderTasks();
         saveToCloud();
     }
@@ -1066,14 +1189,14 @@ function toggleTask(index, person) {
 function cycleTaskStatus(index, person) {
     // Cycle through: No -> Yes -> N/A -> No
 
-    // Get current status from the first available task list (they should all be identical)
-    const firstChildTasks = tasks[familyChildren[0]?.id];
-    if (!firstChildTasks || !firstChildTasks[index]) {
+    // Get current status from tasks
+    const allTasks = getAllTasks();
+    if (!allTasks || !allTasks[index]) {
         console.error(`Task ${index} not found in tasks array`);
         return;
     }
 
-    const currentStatus = firstChildTasks[index].completed[person];
+    const currentStatus = allTasks[index].completed[person];
 
     let newStatus;
     if (currentStatus === false) {
@@ -1091,10 +1214,8 @@ function cycleTaskStatus(index, person) {
     }
 
     // Update the status for this person across all task lists
-    familyChildren.forEach(child => {
-        if (tasks[child.id] && tasks[child.id][index]) {
-            tasks[child.id][index].completed[person] = newStatus;
-        }
+    updateTaskForAllChildren(index, (task) => {
+        task.completed[person] = newStatus;
     });
 
     renderTasks();
@@ -1104,16 +1225,13 @@ function cycleTaskStatus(index, person) {
 function resetAllTasks() {
     if (confirm('Are you sure you want to reset all tasks? This will uncheck all checkboxes and clear the message.')) {
         // Reset all tasks to unchecked, but preserve N/A status
-        familyChildren.forEach(child => {
-            if (tasks[child.id]) {
-                tasks[child.id].forEach(task => {
-                    familyChildren.forEach(childForReset => {
-                        if (task.completed[childForReset.id] !== null) {
-                            task.completed[childForReset.id] = false;
-                        }
-                    });
-                });
-            }
+        const allTasks = getAllTasks();
+        allTasks.forEach(task => {
+            familyChildren.forEach(child => {
+                if (task.completed[child.id] !== null) {
+                    task.completed[child.id] = false;
+                }
+            });
         });
 
         // Reset celebration tracking so kids can be celebrated again
@@ -1132,14 +1250,21 @@ function resetAllTasks() {
 }
 
 function reorderTasks(fromIndex, toIndex) {
-    // Reorder tasks in all person arrays to maintain consistency
-    familyChildren.forEach(child => {
-        if (tasks[child.id]) {
-            const taskArray = tasks[child.id];
-            const [movedTask] = taskArray.splice(fromIndex, 1);
-            taskArray.splice(toIndex, 0, movedTask);
-        }
-    });
+    // Reorder tasks 
+    if (Array.isArray(tasks)) {
+        // v2 format: reorder the shared array
+        const [movedTask] = tasks.splice(fromIndex, 1);
+        tasks.splice(toIndex, 0, movedTask);
+    } else {
+        // v1 format: reorder in all person arrays to maintain consistency
+        familyChildren.forEach(child => {
+            if (tasks[child.id]) {
+                const taskArray = tasks[child.id];
+                const [movedTask] = taskArray.splice(fromIndex, 1);
+                taskArray.splice(toIndex, 0, movedTask);
+            }
+        });
+    }
 
     // Re-render the tasks to reflect the new order
     renderTasks();
@@ -1153,7 +1278,7 @@ function moveTaskUp(index) {
 }
 
 function moveTaskDown(index) {
-    const taskCount = tasks[currentPerson].length;
+    const taskCount = getTasksForPerson(currentPerson).length;
     if (index < taskCount - 1) {
         reorderTasks(index, index + 1);
     }
@@ -1223,10 +1348,8 @@ function showEmojiPicker(taskIndex) {
         btn.textContent = emoji;
         btn.onclick = () => {
             // Update emoji for this task across all people
-            familyChildren.forEach(child => {
-                if (tasks[child.id] && tasks[child.id][taskIndex]) {
-                    tasks[child.id][taskIndex].emoji = emoji;
-                }
+            updateTaskForAllChildren(taskIndex, (task) => {
+                task.emoji = emoji;
             });
             renderTasks();
             saveToCloud();
