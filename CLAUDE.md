@@ -67,3 +67,4 @@ Tasks are stored as:
 
 ## Additional Data
 - `motherMessage`: String containing freeform message displayed in todo mode, editable in edit mode
+- remember that if you're going to test in playwright, you need to call the enableDevMode() function so that the app will work in dev mode.
