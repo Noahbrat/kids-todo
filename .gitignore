@@ -4,3 +4,6 @@
 /.idea/php.xml
 /.idea/vcs.xml
 /.idea/workspace.xml
+
+# Backup files - local task data backups
+backup-tasks.json

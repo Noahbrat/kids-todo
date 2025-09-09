@@ -45,6 +45,26 @@ Since this is a static HTML file, development is straightforward:
 - No build process, package managers, or external dependencies
 - All code is self-contained in a single file
 
+### Testing with Playwright
+**CRITICAL WARNING**: The `enableDevMode()` function modifies production data! Use with extreme caution.
+
+**SAFER TESTING APPROACH**:
+1. Create a separate test JSONBin account and bin ID
+2. Update config.js with test credentials during development
+3. Test with production credentials only when necessary
+
+**If you must use enableDevMode()**:
+1. Navigate to the HTML file
+2. Run `enableDevMode()` in browser console (this loads current production data and adds dev access)
+3. Proceed with testing interactions
+4. Run `disableDevMode()` when done to remove localhost access
+
+**What enableDevMode() does**:
+- Loads current production data from JSONBin
+- Adds localhost/file:// access to the allowedDevelopmentDomains
+- Saves the modified data back to production JSONBin
+- Does NOT create separate dev/prod data isolation
+
 ## Data Structure
 
 Tasks are stored as:

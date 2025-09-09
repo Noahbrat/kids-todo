@@ -531,35 +531,6 @@ function showUnauthorizedDomainError(authorizedDomains) {
 // Development Mode Control Functions
 async function enableDevMode() {
     console.log('🔓 Enabling development mode (localhost access)...');
-    // Use current in-memory data (don't try to load from cloud as that would trigger domain check)
-    
-    // Add development domains and save back to cloud
-    const dataToSave = {
-        version: 1,
-        tasks: tasks,
-        motherMessage: motherMessage,
-        messageHistory: messageHistory,
-        celebratedToday: celebratedToday,
-        children: familyChildren,
-        migrated: true,
-        lastUpdated: new Date().toISOString(),
-        authorizedDomains: ['noahbrat.github.io'], // Always preserve production domain
-        allowedDevelopmentDomains: ["localhost", "127.0.0.1", "file://"] // Add dev access
-    };
-    
-    // Temporarily override saveToCloud to include dev domains
-    const originalData = {
-        version: 1,
-        tasks: tasks,
-        motherMessage: motherMessage,
-        messageHistory: messageHistory,
-        celebratedToday: celebratedToday,
-        children: familyChildren,
-        migrated: true,
-        lastUpdated: new Date().toISOString(),
-        authorizedDomains: [window.location.hostname].filter(domain => domain),
-        allowedDevelopmentDomains: ["localhost", "127.0.0.1", "file://"]
-    };
     
     try {
         if (CONFIG.JSONBIN_API_KEY === 'YOUR_API_KEY_HERE' || CONFIG.JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE') {
@@ -567,13 +538,45 @@ async function enableDevMode() {
             return;
         }
 
+        // CRITICAL FIX: First load the actual production data from cloud
+        // DO NOT use in-memory data which starts with defaults!
+        console.log('Loading current production data before enabling dev mode...');
+        const loadResponse = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}/latest`, {
+            method: 'GET',
+            headers: {
+                'X-Master-Key': CONFIG.JSONBIN_API_KEY
+            }
+        });
+
+        if (!loadResponse.ok) {
+            throw new Error(`Failed to load production data: ${loadResponse.status}`);
+        }
+
+        const loadData = await loadResponse.json();
+        const currentProductionData = loadData.record;
+        
+        // Now add dev access to the ACTUAL production data, not defaults
+        const dataWithDevAccess = {
+            ...currentProductionData,
+            allowedDevelopmentDomains: ["localhost", "127.0.0.1", "file://"],
+            lastUpdated: new Date().toISOString()
+        };
+        
+        // Ensure production domain is always preserved
+        if (!dataWithDevAccess.authorizedDomains) {
+            dataWithDevAccess.authorizedDomains = ['noahbrat.github.io'];
+        } else if (!dataWithDevAccess.authorizedDomains.includes('noahbrat.github.io')) {
+            dataWithDevAccess.authorizedDomains.push('noahbrat.github.io');
+        }
+
+        // Save the production data with dev access added
         const response = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'X-Master-Key': CONFIG.JSONBIN_API_KEY
             },
-            body: JSON.stringify(originalData)
+            body: JSON.stringify(dataWithDevAccess)
         });
 
         if (response.ok) {
