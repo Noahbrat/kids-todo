@@ -1271,7 +1271,7 @@
                 if (data.version === 1 && !data.authorizedDomains) {
                     console.log('Migrating existing data: adding authorized domain for', window.location.hostname);
                     data.authorizedDomains = [window.location.hostname].filter(domain => domain);
-                    data.allowedDevelopmentDomains = ["localhost", "127.0.0.1"];
+                    data.allowedDevelopmentDomains = ["localhost", "127.0.0.1", "file://"];
                     // Save the updated data back to cloud with domain info
                     setTimeout(() => saveToCloud(), 1000); // Save after current load completes
                 } else if (data.version === 1 && data.authorizedDomains && !isAuthorizedDomain(data)) {
@@ -1645,14 +1645,14 @@
         const currentDomain = window.location.hostname;
         const currentProtocol = window.location.protocol;
         
-        // Allow file:// protocol for local testing
-        if (currentProtocol === 'file:') {
-            return true;
-        }
-        
         // Get authorized domains from data, default to empty array
         const authorizedDomains = data.authorizedDomains || [];
-        const devDomains = data.allowedDevelopmentDomains || ["localhost", "127.0.0.1"];
+        const devDomains = data.allowedDevelopmentDomains || [];
+        
+        // For file:// protocol, check if "file://" is in development domains
+        if (currentProtocol === 'file:') {
+            return devDomains.includes('file://');
+        }
         
         // Check if current domain is authorized or is a development domain
         return authorizedDomains.includes(currentDomain) || devDomains.includes(currentDomain);
@@ -1684,8 +1684,7 @@
     // Development Mode Control Functions
     async function enableDevMode() {
         console.log('🔓 Enabling development mode (localhost access)...');
-        // Load current data
-        await loadFromCloud();
+        // Use current in-memory data (don't try to load from cloud as that would trigger domain check)
         
         // Add development domains and save back to cloud
         const dataToSave = {
@@ -1698,7 +1697,7 @@
             migrated: true,
             lastUpdated: new Date().toISOString(),
             authorizedDomains: [window.location.hostname].filter(domain => domain),
-            allowedDevelopmentDomains: ["localhost", "127.0.0.1"] // Add dev access
+            allowedDevelopmentDomains: ["localhost", "127.0.0.1", "file://"] // Add dev access
         };
         
         // Temporarily override saveToCloud to include dev domains
@@ -1712,7 +1711,7 @@
             migrated: true,
             lastUpdated: new Date().toISOString(),
             authorizedDomains: [window.location.hostname].filter(domain => domain),
-            allowedDevelopmentDomains: ["localhost", "127.0.0.1"]
+            allowedDevelopmentDomains: ["localhost", "127.0.0.1", "file://"]
         };
         
         try {
