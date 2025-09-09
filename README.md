@@ -1,14 +1,19 @@
 # Kids Todo List 🌅
 
-A touch-friendly morning todo list app designed specifically for kids, with emoji support, local storage persistence, and iPad optimization.
+A touch-friendly todo list app designed specifically for families, with dynamic children configuration, emoji support, cloud sync, and iPad optimization.
+
+## 🆕 Now Available for All Families!
+
+This app can now be easily customized for any family! See [**SETUP.md**](SETUP.md) for complete instructions.
 
 ## Features ✨
 
 ### 🎯 Core Functionality
 - **Two Modes**: Todo mode (checkboxes) and Edit mode (task management)
-- **Three Children**: Track tasks for Ruthie, Lily, and Allie
+- **Dynamic Children**: Customize for any number of children with their own names
 - **Three-State System**: Tasks can be ✅ completed, ⬜ incomplete, or ❌ N/A per child
-- **Local Storage**: All data persists across page refreshes and browser sessions
+- **Cloud Sync**: All data syncs across devices via JSONBin.io storage
+- **Migration System**: Automatically handles existing data when upgrading
 
 ### 📱 Touch-Optimized Design
 - **Large Checkboxes**: 30px checkboxes with 2x scale for easy iPad/mobile interaction
@@ -32,9 +37,12 @@ A touch-friendly morning todo list app designed specifically for kids, with emoj
 
 ## Usage 🚀
 
-### Getting Started
-1. **Live Version**: Visit https://noahbrat.github.io/kids-todo/
-2. **Local Version**: Open `index.html` in any modern web browser
+### For Your Family
+1. **Fork this repository** and follow the [**SETUP.md**](SETUP.md) guide
+2. **Or try the demo**: Visit https://noahbrat.github.io/kids-todo/ (uses our family's setup)
+
+### Local Development
+- Open `index.html` in any modern web browser
 
 ### iPad Installation
 1. Open the app in Safari on your iPad
