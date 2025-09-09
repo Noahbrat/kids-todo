@@ -1198,7 +1198,7 @@
             children: familyChildren,
             migrated: true,
             lastUpdated: new Date().toISOString(),
-            authorizedDomains: [window.location.hostname].filter(domain => domain) // Current domain only
+            authorizedDomains: ['noahbrat.github.io'] // Always preserve production domain
             // allowedDevelopmentDomains removed for security - use enableDevMode() when testing locally
         };
 
@@ -1649,6 +1649,12 @@
         const authorizedDomains = data.authorizedDomains || [];
         const devDomains = data.allowedDevelopmentDomains || [];
         
+        // Always include production domain from config if available
+        const productionDomain = window.APP_CONFIG?.PRODUCTION_DOMAIN;
+        if (productionDomain && !authorizedDomains.includes(productionDomain)) {
+            authorizedDomains.push(productionDomain);
+        }
+        
         // For file:// protocol, check if "file://" is in development domains
         if (currentProtocol === 'file:') {
             return devDomains.includes('file://');
@@ -1696,7 +1702,7 @@
             children: familyChildren,
             migrated: true,
             lastUpdated: new Date().toISOString(),
-            authorizedDomains: [window.location.hostname].filter(domain => domain),
+            authorizedDomains: ['noahbrat.github.io'], // Always preserve production domain
             allowedDevelopmentDomains: ["localhost", "127.0.0.1", "file://"] // Add dev access
         };
         

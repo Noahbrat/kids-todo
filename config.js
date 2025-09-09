@@ -9,5 +9,8 @@ window.APP_CONFIG = {
     
     // App customization
     APP_TITLE: 'Morning Todo List',
-    APP_EMOJI: '🌅'
+    APP_EMOJI: '🌅',
+    
+    // Production domain protection - always included in authorized domains
+    PRODUCTION_DOMAIN: 'noahbrat.github.io'
 };
