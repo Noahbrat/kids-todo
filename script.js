@@ -1,16 +1,3 @@
-let currentMode = 'todo';
-let currentPerson = 'ruthie';
-let isDragging = false;
-let motherMessage = "Good morning, my beautiful children! Remember to be kind to each other and have a wonderful day! ❤️";
-let messageHistory = [];
-
-// Celebration tracking - prevent repeat celebrations
-let celebratedToday = {
-    ruthie: false,
-    lily: false,
-    allie: false
-};
-
 // Configuration System
 // Uses config.js file that's included in the repository
 const CONFIG = window.APP_CONFIG || {
@@ -18,8 +5,18 @@ const CONFIG = window.APP_CONFIG || {
     JSONBIN_BIN_ID: 'YOUR_BIN_ID_HERE',
     JSONBIN_TEST_BIN_ID: null,
     APP_TITLE: 'Morning Todo List',
-    APP_EMOJI: '🌅'
+    APP_EMOJI: '🌅',
+    DEFAULT_MESSAGE: 'Good morning, my beautiful children! Remember to be kind to each other and have a wonderful day! ❤️'
 };
+
+let currentMode = 'todo';
+let currentPerson = '';  // Will be set from familyChildren[0]?.id when available
+let isDragging = false;
+let motherMessage = CONFIG.DEFAULT_MESSAGE;
+let messageHistory = [];
+
+// Celebration tracking - prevent repeat celebrations - populated dynamically
+let celebratedToday = {};
 
 // Testing Environment Detection
 function isTestingEnvironment() {
@@ -100,12 +97,8 @@ function closeTestModeModal() {
     testModal.classList.add('hidden');
 }
 
-// Family Data Structure
-let familyChildren = [
-    { name: "Ruthie", shortName: "Ruth", id: "ruthie" },
-    { name: "Lily", shortName: "Lily", id: "lily" }, 
-    { name: "Allie", shortName: "Allie", id: "allie" }
-];
+// Family Data Structure - populated from cloud data or setup wizard
+let familyChildren = [];
 
 // Cloud Storage Functions
 async function saveToCloud() {
@@ -299,19 +292,9 @@ async function checkForSetup() {
         
         if (loaded) {
             // We have existing cloud data, check if the loaded data itself is properly configured
-            // If the children array has the expected children, skip setup
-            if (familyChildren && familyChildren.length > 0 && 
-                familyChildren.includes('Ruthie') && familyChildren.includes('Lily') && familyChildren.includes('Allie') &&
-                tasks && tasks.length > 5) { // User has substantial task data
-                // This is properly configured data, no setup needed
-                console.log('Found properly configured family data, skipping setup wizard');
-                hideSetupWizard();
-                return false;
-            }
-            
-            // For other families with different configurations, also check for proper structure
+            // If we have children and tasks data, skip setup
             if (familyChildren && familyChildren.length > 0 && tasks && tasks.length > 0) {
-                console.log('Found configured family data with different children, skipping setup wizard');
+                console.log('Found configured family data, skipping setup wizard');
                 hideSetupWizard();
                 return false;
             }
@@ -464,11 +447,11 @@ function validateSetup() {
 }
 
 function skipSetup() {
-    // Use default children for new families
+    // Use generic default children for new families  
     familyChildren = [
-        { name: "Ruthie", shortName: "Ruth", id: "ruthie" },
-        { name: "Lily", shortName: "Lily", id: "lily" }, 
-        { name: "Allie", shortName: "Allie", id: "allie" }
+        { name: "Child 1", shortName: "C1", id: "child1" },
+        { name: "Child 2", shortName: "C2", id: "child2" },
+        { name: "Child 3", shortName: "C3", id: "child3" }
     ];
     
     completeSetupProcess();
@@ -756,12 +739,8 @@ function removeTaskFromAllChildren(taskIndex) {
     tasks.splice(taskIndex, 1);
 }
 
-// Initialize with v2 format (shared task array)
-let tasks = [
-    { id: 'brush-teeth', name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
-    { id: 'get-dressed', name: 'Get dressed', emoji: '👔', completed: { ruthie: false, lily: false, allie: false } },
-    { id: 'eat-breakfast', name: 'Eat breakfast', emoji: '🍳', completed: { ruthie: false, lily: false, allie: false } }
-];
+// Initialize with empty tasks array - populated from cloud data or setup wizard
+let tasks = [];
 
 // Celebration Functions
 function checkForCompletion(person) {

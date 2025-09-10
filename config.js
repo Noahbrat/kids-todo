@@ -15,6 +15,7 @@ window.APP_CONFIG = {
     // App customization
     APP_TITLE: 'Morning Todo List',
     APP_EMOJI: '🌅',
+    DEFAULT_MESSAGE: 'Good morning, my beautiful children! Remember to be kind to each other and have a wonderful day! ❤️',
 
     // Production domain protection - set to your GitHub Pages domain if deploying
     // Leave as null if you don't need domain-based access control
