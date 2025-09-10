@@ -30,7 +30,7 @@ let familyChildren = [
 // Cloud Storage Functions
 async function saveToCloud() {
     const dataToSave = {
-        version: Array.isArray(tasks) ? 2 : 1, // Use v2 if tasks is already an array
+        version: 2, // Always use v2 format with shared task array
         tasks: tasks,
         motherMessage: motherMessage,
         messageHistory: messageHistory,
@@ -108,30 +108,21 @@ async function loadFromCloud() {
 
             // Check domain authorization before processing data
             // If this is existing data without authorized domains, add current domain for migration
-            if (data.version === 1 && !data.authorizedDomains) {
+            if (!data.authorizedDomains) {
                 console.log('Migrating existing data: adding authorized domain for', window.location.hostname);
                 data.authorizedDomains = [window.location.hostname].filter(domain => domain);
                 data.allowedDevelopmentDomains = ["localhost", "127.0.0.1", "file://"];
                 // Save the updated data back to cloud with domain info
                 setTimeout(() => saveToCloud(), 1000); // Save after current load completes
-            } else if (data.version === 1 && data.authorizedDomains && !isAuthorizedDomain(data)) {
+            } else if (data.authorizedDomains && !isAuthorizedDomain(data)) {
                 console.log('Domain access denied:', window.location.hostname, 'not in', data.authorizedDomains);
                 showUnauthorizedDomainError(data.authorizedDomains);
                 return false;
             }
 
-            if ((data.version === 1 || data.version === 2) && data.tasks && data.motherMessage !== undefined) {
+            if (data.tasks && data.motherMessage !== undefined) {
                 // Handle data migration if needed
-                let processedData = data;
-                if (isV1Format(data)) {
-                    console.log('🔄 Detected v1 format - migrating to v2...');
-                    processedData = migrateV1ToV2(data);
-                    // Auto-save the migrated data back to cloud
-                    setTimeout(() => {
-                        console.log('💾 Auto-saving migrated v2 data to cloud...');
-                        saveToCloud();
-                    }, 1000);
-                }
+                const processedData = data;
                 
                 tasks = processedData.tasks;
                 motherMessage = processedData.motherMessage;
@@ -193,22 +184,9 @@ async function syncFromCloud() {
     }
 }
 
-// Migration and Setup Functions (Fixed to not trigger for properly configured data)
-function needsMigration(data) {
-    // Only migrate if data truly lacks proper structure
-    // FIXED: More strict checking to avoid false positives
-    if (!data) return true;                              // No data at all
-    if (data.migrated === true && 
-        data.children && 
-        data.children.length > 0 && 
-        data.tasks && 
-        Object.keys(data.tasks).length > 0) {
-        return false; // Data is properly configured, no migration needed
-    }
-    return true; // Needs migration
-}
+// Setup Functions
 
-async function checkAndMigrate() {
+async function checkForSetup() {
     try {
         const loaded = await loadFromCloud();
         
@@ -217,7 +195,7 @@ async function checkAndMigrate() {
             // If the children array has the expected children, skip setup
             if (familyChildren && familyChildren.length > 0 && 
                 familyChildren.includes('Ruthie') && familyChildren.includes('Lily') && familyChildren.includes('Allie') &&
-                tasks && Object.keys(tasks).length > 5) { // User has substantial task data
+                tasks && tasks.length > 5) { // User has substantial task data
                 // This is properly configured data, no setup needed
                 console.log('Found properly configured family data, skipping setup wizard');
                 hideSetupWizard();
@@ -225,7 +203,7 @@ async function checkAndMigrate() {
             }
             
             // For other families with different configurations, also check for proper structure
-            if (familyChildren && familyChildren.length > 0 && tasks && Object.keys(tasks).length > 0) {
+            if (familyChildren && familyChildren.length > 0 && tasks && tasks.length > 0) {
                 console.log('Found configured family data with different children, skipping setup wizard');
                 hideSetupWizard();
                 return false;
@@ -237,7 +215,7 @@ async function checkAndMigrate() {
         if (savedData) {
             try {
                 const data = JSON.parse(savedData);
-                if (!needsMigration(data)) {
+                if (data.children && data.children.length > 0) {
                     // Load from localStorage
                     familyChildren = data.children || familyChildren;
                     return false;
@@ -252,7 +230,7 @@ async function checkAndMigrate() {
         return true;
         
     } catch (error) {
-        console.error('Migration check error:', error);
+        console.error('Setup check error:', error);
         // For errors, don't show setup wizard - just proceed normally
         return false;
     }
@@ -416,17 +394,12 @@ function completeSetupProcess() {
     // Update currentPerson to first child
     currentPerson = familyChildren[0]?.id || 'child1';
     
-    // Create/update tasks structure for all children
-    const newTasks = {};
-    familyChildren.forEach(child => {
-        newTasks[child.id] = [
-            { name: 'Brush teeth', emoji: '🦷', completed: createCompletionObject(false) },
-            { name: 'Get dressed', emoji: '👔', completed: createCompletionObject(false) },
-            { name: 'Eat breakfast', emoji: '🍳', completed: createCompletionObject(false) }
-        ];
-    });
-    
-    tasks = newTasks;
+    // Create/update tasks structure in v2 format (shared array)
+    tasks = [
+        { id: 'brush-teeth', name: 'Brush teeth', emoji: '🦷', completed: createCompletionObject(false) },
+        { id: 'get-dressed', name: 'Get dressed', emoji: '👔', completed: createCompletionObject(false) },
+        { id: 'eat-breakfast', name: 'Eat breakfast', emoji: '🍳', completed: createCompletionObject(false) }
+    ];
     
     // Reset celebration tracking for all children
     celebratedToday = {};
@@ -632,15 +605,8 @@ function loadFromLocalStorage() {
         const savedData = localStorage.getItem('kidsTodoData');
         if (savedData) {
             const data = JSON.parse(savedData);
-            if ((data.version === 1 || data.version === 2) && data.tasks && data.motherMessage !== undefined) {
-                // Handle data migration if needed
-                let processedData = data;
-                if (isV1Format(data)) {
-                    console.log('🔄 Migrating localStorage from v1 to v2...');
-                    processedData = migrateV1ToV2(data);
-                    // Auto-save the migrated data back to localStorage
-                    saveToLocalStorage(processedData);
-                }
+            if (data.tasks && data.motherMessage !== undefined) {
+                const processedData = data;
                 
                 tasks = processedData.tasks;
                 motherMessage = processedData.motherMessage;
@@ -711,32 +677,6 @@ function showMessage(text, type = 'info') {
     }, 3000);
 }
 
-// Data Structure Migration Functions
-function migrateV1ToV2(v1Data) {
-    console.log('🔄 Migrating data from v1 (redundant) to v2 (efficient) format...');
-    
-    // Extract unique tasks from the first child's list (they're all identical anyway)
-    const firstChildKey = Object.keys(v1Data.tasks)[0];
-    const uniqueTasks = v1Data.tasks[firstChildKey] || [];
-    
-    // Convert to v2 format: single task list with IDs
-    const v2Tasks = uniqueTasks.map((task, index) => ({
-        id: generateTaskId(task.name),
-        name: task.name,
-        emoji: task.emoji,
-        completed: task.completed
-    }));
-    
-    const v2Data = {
-        ...v1Data,
-        version: 2,
-        tasks: v2Tasks
-    };
-    
-    console.log(`✅ Migration complete: ${uniqueTasks.length} tasks converted from redundant to efficient format`);
-    return v2Data;
-}
-
 function generateTaskId(taskName) {
     // Create a stable ID from task name
     return taskName
@@ -746,99 +686,30 @@ function generateTaskId(taskName) {
         .substring(0, 30); // Limit length
 }
 
-function isV1Format(data) {
-    return data.version === 1 && data.tasks && typeof data.tasks === 'object' && 
-           Object.keys(data.tasks).some(key => Array.isArray(data.tasks[key]));
-}
-
-function isV2Format(data) {
-    return data.version === 2 && Array.isArray(data.tasks);
-}
-
-// Task access wrapper functions for v1/v2 compatibility
-function getTasksForPerson(personId) {
-    if (Array.isArray(tasks)) {
-        // v2 format: return all tasks (they're shared)
-        return tasks;
-    } else {
-        // v1 format: return person-specific array
-        return tasks[personId] || [];
-    }
-}
-
 function getAllTasks() {
-    if (Array.isArray(tasks)) {
-        // v2 format: tasks is already the array
-        return tasks;
-    } else {
-        // v1 format: get from first child (they're all identical)
-        const firstChild = familyChildren[0];
-        return firstChild ? tasks[firstChild.id] || [] : [];
-    }
+    return tasks;
 }
 
 function updateTaskForAllChildren(taskIndex, updateFn) {
-    if (Array.isArray(tasks)) {
-        // v2 format: update the single shared task
-        if (tasks[taskIndex]) {
-            updateFn(tasks[taskIndex]);
-        }
-    } else {
-        // v1 format: update task in each child's array
-        familyChildren.forEach(child => {
-            if (tasks[child.id] && tasks[child.id][taskIndex]) {
-                updateFn(tasks[child.id][taskIndex]);
-            }
-        });
+    if (tasks[taskIndex]) {
+        updateFn(tasks[taskIndex]);
     }
 }
 
 function addTaskToAllChildren(newTask) {
-    if (Array.isArray(tasks)) {
-        // v2 format: add to shared array
-        tasks.push(newTask);
-    } else {
-        // v1 format: add to each child's array
-        familyChildren.forEach(child => {
-            if (tasks[child.id]) {
-                tasks[child.id].push({...newTask});
-            }
-        });
-    }
+    tasks.push(newTask);
 }
 
 function removeTaskFromAllChildren(taskIndex) {
-    if (Array.isArray(tasks)) {
-        // v2 format: remove from shared array
-        tasks.splice(taskIndex, 1);
-    } else {
-        // v1 format: remove from each child's array
-        familyChildren.forEach(child => {
-            if (tasks[child.id]) {
-                tasks[child.id].splice(taskIndex, 1);
-            }
-        });
-    }
+    tasks.splice(taskIndex, 1);
 }
 
-// Initialize with v1 format for backward compatibility
-let tasks = {
-    ruthie: [
-        { name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
-        { name: 'Get dressed', emoji: '👔', completed: { ruthie: false, lily: false, allie: false } },
-        { name: 'Eat breakfast', emoji: '🍳', completed: { ruthie: false, lily: false, allie: false } }
-    ],
-    lily: [
-        { name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
-        { name: 'Get dressed', emoji: '👔', completed: { ruthie: false, lily: false, allie: false } },
-        { name: 'Eat breakfast', emoji: '🍳', completed: { ruthie: false, lily: false, allie: false } }
-    ],
-    allie: [
-        { name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
-        { name: 'Get dressed', emoji: '👔', completed: { ruthie: false, lily: false, allie: false } },
-        { name: 'Eat breakfast', emoji: '🍳', completed: { ruthie: false, lily: false, allie: false } }
-    ]
-};
+// Initialize with v2 format (shared task array)
+let tasks = [
+    { id: 'brush-teeth', name: 'Brush teeth', emoji: '🦷', completed: { ruthie: false, lily: false, allie: null } },
+    { id: 'get-dressed', name: 'Get dressed', emoji: '👔', completed: { ruthie: false, lily: false, allie: false } },
+    { id: 'eat-breakfast', name: 'Eat breakfast', emoji: '🍳', completed: { ruthie: false, lily: false, allie: false } }
+];
 
 // Celebration Functions
 function checkForCompletion(person) {
@@ -847,7 +718,7 @@ function checkForCompletion(person) {
         return false;
     }
 
-    const personTasks = getTasksForPerson(person);
+    const personTasks = tasks;
 
     // Check if all applicable tasks (non-null) are completed
     let applicableTasks = 0;
@@ -998,7 +869,7 @@ function renderTasks() {
     const tasksList = document.getElementById('tasksList');
     tasksList.innerHTML = '';
 
-    const personTasks = getTasksForPerson(currentPerson);
+    const personTasks = tasks;
     if (!personTasks || personTasks.length === 0) {
         console.warn(`No tasks found for person: ${currentPerson}`);
         return;
@@ -1148,7 +1019,7 @@ function addTask() {
 }
 
 function editTask(index) {
-    const currentTasks = getTasksForPerson(currentPerson);
+    const currentTasks = tasks;
     const newName = prompt('Edit task name:', currentTasks[index].name);
     if (newName && newName.trim()) {
         // Update task name for all people
@@ -1170,12 +1041,10 @@ function deleteTask(index) {
 }
 
 function toggleTask(index, person) {
-    // Toggle completion status for the specific person on all task lists
-    familyChildren.forEach(child => {
-        if (tasks[child.id] && tasks[child.id][index]) {
-            tasks[child.id][index].completed[person] = !tasks[child.id][index].completed[person];
-        }
-    });
+    // Toggle completion status for the specific person in the shared task array
+    if (tasks[index]) {
+        tasks[index].completed[person] = !tasks[index].completed[person];
+    }
     renderTasks();
     saveToCloud();
 
@@ -1190,7 +1059,7 @@ function cycleTaskStatus(index, person) {
     // Cycle through: No -> Yes -> N/A -> No
 
     // Get current status from tasks
-    const allTasks = getAllTasks();
+    const allTasks = tasks;
     if (!allTasks || !allTasks[index]) {
         console.error(`Task ${index} not found in tasks array`);
         return;
@@ -1225,7 +1094,7 @@ function cycleTaskStatus(index, person) {
 function resetAllTasks() {
     if (confirm('Are you sure you want to reset all tasks? This will uncheck all checkboxes and clear the message.')) {
         // Reset all tasks to unchecked, but preserve N/A status
-        const allTasks = getAllTasks();
+        const allTasks = tasks;
         allTasks.forEach(task => {
             familyChildren.forEach(child => {
                 if (task.completed[child.id] !== null) {
@@ -1278,7 +1147,7 @@ function moveTaskUp(index) {
 }
 
 function moveTaskDown(index) {
-    const taskCount = getTasksForPerson(currentPerson).length;
+    const taskCount = tasks.length;
     if (index < taskCount - 1) {
         reorderTasks(index, index + 1);
     }
@@ -1532,7 +1401,7 @@ function updateDayOfWeek() {
 // Initialize app with cloud storage and migration
 async function initializeApp() {
     // Check for migration needs first
-    const needsSetup = await checkAndMigrate();
+    const needsSetup = await checkForSetup();
     
     if (!needsSetup) {
         // No setup needed, proceed normally
