@@ -27,6 +27,13 @@
         </button>
     </div>
 
+    <!-- Test Mode Banner -->
+    <div class="test-mode-banner hidden" id="testModeBanner">
+        <span class="test-icon">⚠️</span>
+        <span class="test-text">LOCAL TEST MODE - USING LOCAL STORAGE ONLY</span>
+        <span class="test-icon">⚠️</span>
+    </div>
+
     <div class="mode-buttons">
         <button class="mode-btn todo-mode" id="todoModeBtn">Todo Mode</button>
         <button class="mode-btn inactive" id="editModeBtn">Edit Mode</button>
@@ -82,6 +89,24 @@
 
 <!-- Celebration Overlay -->
 <div class="celebration-overlay" id="celebrationOverlay"></div>
+
+<!-- Test Mode Warning Modal -->
+<div class="test-mode-modal hidden" id="testModeModal">
+    <div class="test-modal-content">
+        <div class="test-modal-header">
+            <span class="test-modal-icon">⚠️</span>
+            <h2>LOCAL TEST MODE ACTIVE</h2>
+            <span class="test-modal-icon">⚠️</span>
+        </div>
+        <div class="test-modal-body">
+            <p><strong>You are testing locally!</strong></p>
+            <p>All changes are saved to your browser's local storage only.</p>
+            <p>Your production family data is completely safe and untouched.</p>
+            <p><em>This is the recommended way to test the app!</em></p>
+        </div>
+        <button class="test-modal-button" onclick="closeTestModeModal()">Perfect - Continue Testing</button>
+    </div>
+</div>
 
 <!-- Setup Wizard Overlay -->
 <div class="setup-overlay" id="setupOverlay">

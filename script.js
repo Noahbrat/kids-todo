@@ -15,10 +15,90 @@ let celebratedToday = {
 // Uses config.js file that's included in the repository
 const CONFIG = window.APP_CONFIG || {
     JSONBIN_API_KEY: 'YOUR_API_KEY_HERE',
-    JSONBIN_BIN_ID: 'YOUR_BIN_ID_HERE', 
+    JSONBIN_BIN_ID: 'YOUR_BIN_ID_HERE',
+    JSONBIN_TEST_BIN_ID: null,
     APP_TITLE: 'Morning Todo List',
     APP_EMOJI: '🌅'
 };
+
+// Testing Environment Detection
+function isTestingEnvironment() {
+    const currentDomain = window.location.hostname;
+    const currentProtocol = window.location.protocol;
+    
+    // Consider it testing if:
+    // 1. Running locally (localhost, 127.0.0.1, or file://)
+    // 2. Not on the production domain
+    return (
+        currentProtocol === 'file:' ||
+        currentDomain === 'localhost' ||
+        currentDomain === '127.0.0.1' ||
+        currentDomain === '' ||  // file:// protocol has empty hostname
+        (CONFIG.PRODUCTION_DOMAIN && currentDomain !== CONFIG.PRODUCTION_DOMAIN)
+    );
+}
+
+function getActiveBinId() {
+    const testMode = isTestingEnvironment();
+    const hasTestBin = CONFIG.JSONBIN_TEST_BIN_ID && CONFIG.JSONBIN_TEST_BIN_ID !== null;
+    
+    if (testMode && hasTestBin) {
+        console.log('🧪 Using TEST bin for safe local development');
+        return CONFIG.JSONBIN_TEST_BIN_ID;
+    }
+    
+    if (testMode && !hasTestBin) {
+        console.warn('⚠️ Testing environment detected but no test bin configured. Using localStorage only.');
+        return null; // Will trigger localStorage-only mode
+    }
+    
+    console.log('✅ Using PRODUCTION bin');
+    return CONFIG.JSONBIN_BIN_ID;
+}
+
+function isInTestMode() {
+    return isTestingEnvironment() && CONFIG.JSONBIN_TEST_BIN_ID;
+}
+
+// Visual Test Mode Functions
+function updateTestModeUI() {
+    const testBanner = document.getElementById('testModeBanner');
+    const testModal = document.getElementById('testModeModal');
+    const body = document.body;
+    
+    if (isTestingEnvironment()) {
+        // Show test mode banner for ANY local testing
+        testBanner.classList.remove('hidden');
+        
+        // Show warning modal
+        showTestModeModal();
+        
+        if (isInTestMode()) {
+            console.log('🚨 LOCAL TEST MODE - Using test bin for cloud storage');
+            console.log('⚠️ All data saved to TEST bin - production data is safe');
+        } else {
+            console.log('🚨 LOCAL TEST MODE - Using localStorage only');
+            console.log('⚠️ No cloud saves during testing - production data is safe');
+            console.log('💡 This is perfect for most testing needs!');
+        }
+    } else {
+        // Hide test mode indicators (production environment)
+        testBanner.classList.add('hidden');
+        testModal.classList.add('hidden');
+        
+        console.log('✅ PRODUCTION MODE - Using production data');
+    }
+}
+
+function showTestModeModal() {
+    const testModal = document.getElementById('testModeModal');
+    testModal.classList.remove('hidden');
+}
+
+function closeTestModeModal() {
+    const testModal = document.getElementById('testModeModal');
+    testModal.classList.add('hidden');
+}
 
 // Family Data Structure
 let familyChildren = [
@@ -29,6 +109,8 @@ let familyChildren = [
 
 // Cloud Storage Functions
 async function saveToCloud() {
+    const activeBinId = getActiveBinId();
+    
     const dataToSave = {
         version: 2, // Always use v2 format with shared task array
         tasks: tasks,
@@ -38,24 +120,31 @@ async function saveToCloud() {
         children: familyChildren,
         migrated: true,
         lastUpdated: new Date().toISOString(),
-        authorizedDomains: ['noahbrat.github.io'] // Always preserve production domain
-        // allowedDevelopmentDomains removed for security - use enableDevMode() when testing locally
+        authorizedDomains: ['noahbrat.github.io'], // Always preserve production domain
+        testMode: isInTestMode() // Flag to identify test data
     };
 
     try {
         // Show loading state
-        setLoadingState(true, 'Saving...');
+        setLoadingState(true, isInTestMode() ? 'Saving test data...' : 'Saving...');
 
         // Check if API credentials are configured  
-        if (CONFIG.JSONBIN_API_KEY === 'YOUR_API_KEY_HERE' || CONFIG.JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE') {
+        if (CONFIG.JSONBIN_API_KEY === 'YOUR_API_KEY_HERE' || (!activeBinId && !isTestingEnvironment())) {
             showMessage('Please edit config.js with your JSONBin credentials', 'warning');
             // Save to localStorage only
             saveToLocalStorage(dataToSave);
             return;
         }
 
+        // If no bin ID available (testing without test bin), use localStorage only
+        if (!activeBinId) {
+            saveToLocalStorage(dataToSave);
+            showMessage('Saved locally (no test bin configured)', 'info');
+            return;
+        }
+
         // Update existing bin
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}`, {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${activeBinId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,7 +154,8 @@ async function saveToCloud() {
         });
 
         if (response.ok) {
-            showMessage('Data saved to cloud!', 'success');
+            const saveMessage = isInTestMode() ? 'Test data saved!' : 'Data saved to cloud!';
+            showMessage(saveMessage, 'success');
         }
 
         if (!response.ok) {
@@ -79,23 +169,35 @@ async function saveToCloud() {
         console.error('Cloud save error:', error);
         // Fall back to localStorage
         saveToLocalStorage(dataToSave);
-        showMessage('Saved locally (cloud unavailable)', 'warning');
+        const errorMessage = isInTestMode() ? 'Saved test data locally (cloud unavailable)' : 'Saved locally (cloud unavailable)';
+        showMessage(errorMessage, 'warning');
     } finally {
         setLoadingState(false);
     }
 }
 
 async function loadFromCloud() {
+    const activeBinId = getActiveBinId();
+    
     try {
-        setLoadingState(true, 'Loading...');
+        setLoadingState(true, isInTestMode() ? 'Loading test data...' : 'Loading...');
 
-        if (CONFIG.JSONBIN_API_KEY === 'YOUR_API_KEY_HERE' || CONFIG.JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE') {
+        if (CONFIG.JSONBIN_API_KEY === 'YOUR_API_KEY_HERE' || (!activeBinId && !isTestingEnvironment())) {
             // API not configured, use localStorage
             showMessage('Edit config.js with your JSONBin credentials for cloud sync', 'warning');
             return loadFromLocalStorage();
         }
 
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}/latest`, {
+        // If no bin ID available (testing without test bin), use localStorage only
+        if (!activeBinId) {
+            const loaded = loadFromLocalStorage();
+            if (loaded) {
+                showMessage('Loaded from local storage (no test bin configured)', 'info');
+            }
+            return loaded;
+        }
+
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${activeBinId}/latest`, {
             method: 'GET',
             headers: {
                 'X-Master-Key': CONFIG.JSONBIN_API_KEY
@@ -106,18 +208,21 @@ async function loadFromCloud() {
             const result = await response.json();
             const data = result.record;
 
-            // Check domain authorization before processing data
-            // If this is existing data without authorized domains, add current domain for migration
-            if (!data.authorizedDomains) {
-                console.log('Migrating existing data: adding authorized domain for', window.location.hostname);
-                data.authorizedDomains = [window.location.hostname].filter(domain => domain);
-                data.allowedDevelopmentDomains = ["localhost", "127.0.0.1", "file://"];
-                // Save the updated data back to cloud with domain info
-                setTimeout(() => saveToCloud(), 1000); // Save after current load completes
-            } else if (data.authorizedDomains && !isAuthorizedDomain(data)) {
-                console.log('Domain access denied:', window.location.hostname, 'not in', data.authorizedDomains);
-                showUnauthorizedDomainError(data.authorizedDomains);
-                return false;
+            // In test mode, skip domain authorization checks
+            if (!isInTestMode()) {
+                // Check domain authorization before processing data
+                // If this is existing data without authorized domains, add current domain for migration
+                if (!data.authorizedDomains) {
+                    console.log('Migrating existing data: adding authorized domain for', window.location.hostname);
+                    data.authorizedDomains = [window.location.hostname].filter(domain => domain);
+                    data.allowedDevelopmentDomains = ["localhost", "127.0.0.1", "file://"];
+                    // Save the updated data back to cloud with domain info
+                    setTimeout(() => saveToCloud(), 1000); // Save after current load completes
+                } else if (data.authorizedDomains && !isAuthorizedDomain(data)) {
+                    console.log('Domain access denied:', window.location.hostname, 'not in', data.authorizedDomains);
+                    showUnauthorizedDomainError(data.authorizedDomains);
+                    return false;
+                }
             }
 
             if (data.tasks && data.motherMessage !== undefined) {
@@ -134,7 +239,8 @@ async function loadFromCloud() {
                     familyChildren = processedData.children;
                 }
                 
-                showMessage('Data loaded from cloud!', 'success');
+                const loadMessage = isInTestMode() ? 'Test data loaded!' : 'Data loaded from cloud!';
+                showMessage(loadMessage, 'success');
                 return true;
             }
         } else {
@@ -145,7 +251,8 @@ async function loadFromCloud() {
         // Fall back to localStorage
         const loaded = loadFromLocalStorage();
         if (loaded) {
-            showMessage('Loaded from local storage', 'warning');
+            const errorMessage = isInTestMode() ? 'Loaded test data from local storage' : 'Loaded from local storage';
+            showMessage(errorMessage, 'warning');
         }
         return loaded;
     } finally {
@@ -410,6 +517,7 @@ function completeSetupProcess() {
     // Update page title and UI
     updatePageTitle();
     updateTableStructure();
+    updateTestModeUI();
     renderTasks();
     updateMessageDisplay();
     
@@ -513,76 +621,20 @@ function showUnauthorizedDomainError(authorizedDomains) {
     showSetupWizard();
 }
 
-// Development Mode Control Functions
-async function enableDevMode() {
-    console.log('🔓 Enabling development mode (localhost access)...');
-    
-    try {
-        if (CONFIG.JSONBIN_API_KEY === 'YOUR_API_KEY_HERE' || CONFIG.JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE') {
-            alert('Please configure your JSONBin credentials first');
-            return;
-        }
-
-        // CRITICAL FIX: First load the actual production data from cloud
-        // DO NOT use in-memory data which starts with defaults!
-        console.log('Loading current production data before enabling dev mode...');
-        const loadResponse = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}/latest`, {
-            method: 'GET',
-            headers: {
-                'X-Master-Key': CONFIG.JSONBIN_API_KEY
-            }
-        });
-
-        if (!loadResponse.ok) {
-            throw new Error(`Failed to load production data: ${loadResponse.status}`);
-        }
-
-        const loadData = await loadResponse.json();
-        const currentProductionData = loadData.record;
-        
-        // Now add dev access to the ACTUAL production data, not defaults
-        const dataWithDevAccess = {
-            ...currentProductionData,
-            allowedDevelopmentDomains: ["localhost", "127.0.0.1", "file://"],
-            lastUpdated: new Date().toISOString()
-        };
-        
-        // Ensure production domain is always preserved
-        if (!dataWithDevAccess.authorizedDomains) {
-            dataWithDevAccess.authorizedDomains = ['noahbrat.github.io'];
-        } else if (!dataWithDevAccess.authorizedDomains.includes('noahbrat.github.io')) {
-            dataWithDevAccess.authorizedDomains.push('noahbrat.github.io');
-        }
-
-        // Save the production data with dev access added
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': CONFIG.JSONBIN_API_KEY
-            },
-            body: JSON.stringify(dataWithDevAccess)
-        });
-
-        if (response.ok) {
-            console.log('✅ Development mode enabled! localhost access allowed.');
-            showMessage('Development mode enabled - localhost access allowed', 'success');
-        } else {
-            throw new Error(`Failed to enable dev mode: ${response.status}`);
-        }
-    } catch (error) {
-        console.error('Failed to enable dev mode:', error);
-        showMessage('Failed to enable dev mode', 'error');
-    }
-}
-
-async function disableDevMode() {
-    console.log('🔒 Disabling development mode (removing localhost access)...');
-    // This will use the normal saveToCloud which excludes development domains
-    await saveToCloud();
-    console.log('✅ Development mode disabled! localhost access removed.');
-    showMessage('Development mode disabled - localhost access removed', 'success');
-}
+// Development Mode Control Functions - REMOVED FOR SAFETY
+// 
+// The enableDevMode() and disableDevMode() functions have been removed because they
+// were repeatedly overwriting production data with demo tasks during testing.
+// 
+// For safe development testing:
+// 1. Create a separate JSONBin account with test credentials
+// 2. Use a separate config-dev.js file for testing
+// 3. NEVER test with production credentials
+//
+// If you need to test locally:
+// 1. Fork the repo
+// 2. Set up your own JSONBin account
+// 3. Use completely separate credentials for testing
 
 // localStorage backup functions
 function saveToLocalStorage(dataToSave = null) {
@@ -1400,6 +1452,9 @@ function updateDayOfWeek() {
 
 // Initialize app with cloud storage and migration
 async function initializeApp() {
+    // Initialize test mode UI immediately
+    updateTestModeUI();
+    
     // Check for migration needs first
     const needsSetup = await checkForSetup();
     
