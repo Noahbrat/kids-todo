@@ -120,7 +120,7 @@ async function saveToCloud() {
         children: familyChildren,
         migrated: true,
         lastUpdated: new Date().toISOString(),
-        authorizedDomains: ['noahbrat.github.io'], // Always preserve production domain
+        authorizedDomains: CONFIG.PRODUCTION_DOMAIN ? [CONFIG.PRODUCTION_DOMAIN] : [], // Use configured production domain
         testMode: isInTestMode() // Flag to identify test data
     };
 
