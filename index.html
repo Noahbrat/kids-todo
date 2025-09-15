@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title></title>
 
+    <!-- Prevent HTML caching for dynamic web app -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <!-- iOS Web App Meta Tags -->
     <meta name="apple-mobile-web-app-title" content="Morning Todo">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8cmFkaWFsR3JhZGllbnQgaWQ9InN1bnNldCIgY3g9IjUwJSIgY3k9IjcwJSIgcj0iNjAlIj4KPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGRjNBMCIvPgo8c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGQzY1NyIvPgo8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGRjhBODAiLz4KPC9yYWRpYWxHcmFkaWVudD4KPC9kZWZzPgo8cGF0aCBkPSJNMCAwSDE4MFYxODBIMFoiIGZpbGw9InVybCgjc3Vuc2V0KSIvPgo8Y2lyY2xlIGN4PSI5MCIgY3k9IjEyMCIgcj0iMzUiIGZpbGw9IiNGRkY3Q0QiIHN0cm9rZT0iI0ZGRUMwMCIgc3Ryb2tlLXdpZHRoPSIzIi8+CjwhLS0gU3VuIHJheXMgLS0+CjxwYXRoIGQ9Ik05MCA2MEw5MCA0NSIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTI1IDc3TDEzNSA2NyIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTQyIDEyMEwxNTcgMTIwIiBzdHJva2U9IiNGRkVDMDAiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjxwYXRoIGQ9Ik01NSA3N0w0NSA2NyIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMzggMTIwTDIzIDEyMCIgc3Ryb2tlPSIjRkZFQzAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8IS0tIENoZWNrbWFyayAtLT4KPHBhdGggZD0iTTcwIDEzNUw4MiAxNDdMTEwIDExOSIgc3Ryb2tlPSIjNENBRjUwIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K">
@@ -15,7 +20,7 @@
         window.APP_CONFIG = window.APP_CONFIG || {};
     </script>
     <script src="config.js" onerror="console.log('No config.js found - using fallback configuration')"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=1">
 </head>
 <body>
 <div class="container">
@@ -131,6 +136,6 @@
     </div>
 </div>
 
-<script src="script.js"></script>
+<script src="script.js?v=1"></script>
 </body>
 </html>
