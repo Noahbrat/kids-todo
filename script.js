@@ -17,6 +17,7 @@ let messageHistory = [];
 
 // Celebration tracking - prevent repeat celebrations - populated dynamically
 let celebratedToday = {};
+let celebrationTimeout = null;
 
 // Testing Environment Detection
 function isTestingEnvironment() {
@@ -773,10 +774,43 @@ function showCelebration(person) {
     celebratedToday[person] = true;
 
     const overlay = document.getElementById('celebrationOverlay');
-    
+
     // Find the person name from familyChildren
     const child = familyChildren.find(c => c.id === person);
     const personName = child ? child.name : person;
+
+    // Check if celebration is already active and extract existing names
+    let allNames = [personName];
+    if (overlay.classList.contains('active')) {
+        const existingMessage = overlay.querySelector('.celebration-message');
+        if (existingMessage) {
+            // Extract names from existing message like "Great job, Ruthie!" or "Great job, Ruthie and Lily!"
+            const messageText = existingMessage.textContent;
+            const match = messageText.match(/Great job, ([^!]+)!/);
+            if (match) {
+                const existingNamesStr = match[1];
+                // Parse existing names (handle "Name", "Name and Name", "Name, Name, and Name")
+                const existingNames = existingNamesStr
+                    .split(/,|\sand\s/)
+                    .map(name => name.trim())
+                    .filter(name => name);
+
+                // Combine existing names with new name (avoid duplicates)
+                allNames = [...new Set([...existingNames, personName])];
+            }
+        }
+    }
+
+    // Create combined message with proper grammar
+    let combinedMessage;
+    if (allNames.length === 1) {
+        combinedMessage = `🎉 Great job, ${allNames[0]}! 🌟<br>All done! `;
+    } else if (allNames.length === 2) {
+        combinedMessage = `🎉 Great job, ${allNames[0]} and ${allNames[1]}! 🌟<br>All done! `;
+    } else {
+        const lastChild = allNames.pop();
+        combinedMessage = `🎉 Amazing work, ${allNames.join(', ')}, and ${lastChild}! 🌟<br>All done! `;
+    }
 
     // Clear any existing celebration content
     overlay.innerHTML = '';
@@ -784,7 +818,7 @@ function showCelebration(person) {
     // Create celebration message
     const messageDiv = document.createElement('div');
     messageDiv.className = 'celebration-message';
-    messageDiv.innerHTML = `🎉 Great job, ${personName}! 🌟<br>All done! `;
+    messageDiv.innerHTML = combinedMessage;
 
     // Create floating emojis
     const celebrationEmojis = ['🎉', '⭐', '🌟', '🎊', '✨', '🏆', '💖', '🎈'];
@@ -828,11 +862,17 @@ function showCelebration(person) {
     // Show the celebration
     overlay.classList.add('active');
 
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
+    // Clear any existing celebration timeout
+    if (celebrationTimeout) {
+        clearTimeout(celebrationTimeout);
+    }
+
+    // Auto-hide after 5 seconds (restart timer for combined celebrations)
+    celebrationTimeout = setTimeout(() => {
         overlay.classList.remove('active');
         setTimeout(() => {
             overlay.innerHTML = '';
+            celebrationTimeout = null;
         }, 500); // Wait for fade-out transition
     }, 5000);
 }
