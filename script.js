@@ -1025,6 +1025,44 @@ function renderTasks() {
 
         tasksList.appendChild(row);
     });
+
+    // Add celebration editing row in edit mode
+    if (currentMode === 'edit') {
+        const celebrationRow = document.createElement('tr');
+        celebrationRow.className = 'celebration-row';
+        celebrationRow.style.borderTop = '2px solid #ddd';
+        celebrationRow.style.backgroundColor = '#f8f8f8';
+
+        // First cell - label
+        const labelCell = document.createElement('td');
+        labelCell.innerHTML = '🎉 <strong>Celebrated Today</strong>';
+        labelCell.style.fontWeight = 'bold';
+        labelCell.style.color = '#666';
+        celebrationRow.appendChild(labelCell);
+
+        // Create celebration checkboxes for each child
+        familyChildren.forEach(child => {
+            const childCell = document.createElement('td');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'celebration-checkbox';
+            checkbox.checked = celebratedToday[child.id] === true;
+            checkbox.onchange = () => {
+                celebratedToday[child.id] = checkbox.checked;
+                saveToCloud();
+            };
+
+            childCell.appendChild(checkbox);
+            celebrationRow.appendChild(childCell);
+        });
+
+        // Add empty cell for actions column if in edit mode
+        const actionCell = document.createElement('td');
+        celebrationRow.appendChild(actionCell);
+
+        tasksList.appendChild(celebrationRow);
+    }
 }
 
 function addTask() {
