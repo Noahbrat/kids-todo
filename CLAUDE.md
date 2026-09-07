@@ -4,109 +4,95 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a single-file HTML application for managing kids' morning todo lists. The app allows tracking tasks for three children (Ruthie, Lily, and Allie) with two modes:
+This is a kids' morning todo list app for a configurable set of children (set up via a first-run wizard, not hardcoded names). It has two modes:
 - **Todo Mode**: Interactive mode with checkboxes for completing tasks and a reset button
-- **Edit Mode**: Administrative mode for adding, editing, deleting, and reordering tasks
+- **Edit Mode**: Administrative mode for adding, editing, deleting, and reordering tasks, plus editing children's names
 
 ## Architecture
 
-The entire application is contained in `index.html`:
-- **HTML Structure**: Container with mode buttons, person tabs, and dynamic task list
-- **CSS**: Embedded styles with a warm gradient background and modern card-based UI
-- **JavaScript**: Vanilla JS with in-memory task storage and DOM manipulation
+The app is split into three files:
+- **`index.html`**: Page structure only (containers, modals, the setup wizard) — no embedded styles or logic
+- **`styles.css`**: All styling — warm gradient background, card-based UI, test-mode banner styling
+- **`script.js`**: All application logic — vanilla JS, no build step or framework
+- **`config.js`** (gitignored, created from `config.example.js`): Per-deployment JSONBin credentials and app title/emoji. Falls back to defaults in `script.js` if absent.
 
 ## Key Features
 
 ### Core Functionality
-- **Task Storage**: In-memory JavaScript object with shared tasks across all children
+- **Task Storage**: Shared array of tasks (not per-child), each with a `completed` map keyed by child id
+- **Cloud Sync**: Saves/loads via JSONBin.io (`JSONBIN_BIN_ID` in `config.js`), with `localStorage` as a fallback/backup when JSONBin isn't configured or reachable
 - **Mode System**: Toggle between todo/edit modes with different UI behaviors
-- **Checkboxes**: Large, touch-friendly checkboxes in todo mode (30px with 2x scale)
+- **Checkboxes**: Large, touch-friendly checkboxes in todo mode
 - **Three-State System**: Tasks can be completed (✓), incomplete ( ), or N/A for each child
+- **Setup Wizard**: First-run flow to name the children (`familyChildren`), editable later from Edit Mode
 
 ### Task Management (Edit Mode)
 - **Add Tasks**: Create new tasks that appear for all children
 - **Edit Tasks**: Modify task names across all children simultaneously
 - **Delete Tasks**: Remove tasks from all children's lists
-- **Reorder Tasks**: Up/down arrow buttons to move tasks (replaced drag-and-drop for better mobile compatibility)
-- **Emoji Support**: Full-screen emoji picker with 90+ task-related emojis organized by category
+- **Reorder Tasks**: Up/down arrow buttons to move tasks
+- **Emoji Support**: Full-screen emoji picker (`showEmojiPicker` in `script.js`) with task emojis organized by category
 - **Reset Function**: Clear all checkboxes and mother's message with confirmation
 
 ### User Interface
-- **Table Layout**: Reliable alignment using HTML tables instead of flexbox
+- **Table Layout**: HTML table for reliable column alignment across children
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 - **Touch Optimized**: Large buttons and checkboxes for iPad/mobile use
-- **Mother's Message**: Freeform text area for daily messages from parents
-- **Visual Feedback**: Hover effects, transitions, and modern styling
+- **Mother's Message**: Freeform text area for daily messages, with history, editable in edit mode
+- **Visual Feedback**: Hover effects, transitions, celebration animation on completing all tasks
 
 ## Development
 
-Since this is a static HTML file, development is straightforward:
-- Open `index.html` directly in a browser to test changes
-- No build process, package managers, or external dependencies
-- All code is self-contained in a single file
+Static site, no build process, package manager, or external dependencies:
+- Open `index.html` directly in a browser to test changes (loads `styles.css` and `script.js`)
+- Without a `config.js`, the app falls back to placeholder JSONBin credentials and runs in localStorage-only mode
 
 ### Testing and Development
 
 **✅ SAFE AUTOMATIC LOCAL TESTING**
 
-The app automatically detects when you're testing locally and provides a completely safe testing environment using localStorage.
+The app detects local/non-production environments (`isTestingEnvironment()` in `script.js`) and avoids touching production cloud data.
 
 **How it Works**:
-- When running locally (file://, localhost, etc.), dramatic visual warnings appear
-- All data is saved to browser localStorage only - no cloud operations
-- Production data is never touched or accessed
-- Same app logic is tested, just with local storage instead of cloud
+- Running via `file://`, `localhost`, `127.0.0.1`, or any domain other than `CONFIG.PRODUCTION_DOMAIN` counts as testing
+- In test mode, data is saved to a configured `JSONBIN_TEST_BIN_ID` if present, otherwise to `localStorage` only
+- Production bin is only used when `JSONBIN_TEST_BIN_ID` isn't set and the environment isn't detected as testing
+- Dramatic visual warnings (red banner, modal, watermark) make test mode obvious in the UI
 
-**Testing Setup (Zero Configuration Required!)**:
-1. **Open index.html locally** - that's it!
-2. **Dramatic red warnings appear** - impossible to miss you're testing
-3. **All changes use localStorage** - completely safe from production
-4. **Test everything normally** - same functionality, safe storage
-
-**Visual Test Indicators**:
-- 🚨 Red "LOCAL TEST MODE" banner with blinking animations
-- Red color scheme with diagonal stripes
-- "(TEST)" in browser tab title
-- "TEST MODE" watermark behind content
-- Warning modal popup on first load
-- Fixed footer warning always visible
-
-**Why localStorage Testing is Perfect**:
-- ✅ **Zero setup** - works immediately when testing locally
-- ✅ **Zero risk** - impossible to affect production data  
-- ✅ **Same logic** - tests 95% of the same code paths
-- ✅ **Faster** - no network delays during testing
-- ✅ **Offline** - works without internet connection
+**Testing Setup (Zero Configuration Required)**:
+1. Open `index.html` locally
+2. Red "LOCAL TEST MODE" warnings appear automatically
+3. Data is saved to `localStorage` (key `kidsTodoData`) unless a test bin is configured
+4. Test everything normally — same code path as production, different storage
 
 **Optional: Advanced Cloud Testing**:
-If you need to test cloud-specific scenarios:
 1. Create a test bin at https://jsonbin.io
-2. Add `JSONBIN_TEST_BIN_ID: 'your-test-bin-id'` to config.js
-3. Same dramatic warnings, but saves to test bin instead of localStorage
+2. Add `JSONBIN_TEST_BIN_ID: 'your-test-bin-id'` to `config.js`
+3. Same warnings, but saves to the test bin instead of localStorage
 
 **For Playwright Testing**:
-- Just run tests locally - automatic localStorage mode
-- All the dramatic visual warnings help confirm test environment
-- No setup or configuration needed
-
-**Production Data Safety**:
-- Production backup maintained in `backup-tasks.json`
-- Production bin only used when on production domain (noahbrat.github.io)
-- Local testing never accesses cloud storage without explicit test bin setup
+- Run tests locally — localStorage mode kicks in automatically, no setup needed
 
 ## Data Structure
 
-Tasks are stored as:
+Children are stored as:
 ```javascript
-{
-  person: [
-    { 
-      name: 'Task name',
-      emoji: '📝', // Optional emoji for the task
-      completed: { ruthie: boolean|null, lily: boolean|null, allie: boolean|null } 
-    }
-  ]
-}
+familyChildren = [
+  { name: 'Ruthie', shortName: 'Ruthie', id: 'ruthie' },
+  // ...
+]
+```
+
+Tasks are stored as a single shared array (not one list per child):
+```javascript
+tasks = [
+  {
+    id: 'brush-teeth',
+    name: 'Brush teeth',
+    emoji: '🦷', // Optional emoji for the task
+    completed: { ruthie: boolean|null, lily: boolean|null, /* ...one entry per child id */ }
+  }
+]
 ```
 
 **Note**: `completed` values can be:
@@ -116,3 +102,4 @@ Tasks are stored as:
 
 ## Additional Data
 - `motherMessage`: String containing freeform message displayed in todo mode, editable in edit mode
+- `messageHistory`: Array of previously saved messages, shown in Edit Mode
