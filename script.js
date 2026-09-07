@@ -604,6 +604,7 @@ function validateEditNames() {
     const inputs = area.querySelectorAll('.child-input');
 
     let hasErrors = false;
+    let hasDuplicate = false;
     const names = [];
 
     inputs.forEach(input => {
@@ -615,6 +616,7 @@ function validateEditNames() {
             input.classList.add('error');
         } else if (names.includes(name.toLowerCase())) {
             hasErrors = true;
+            hasDuplicate = true;
             input.classList.add('error');
         } else {
             names.push(name.toLowerCase());
@@ -622,11 +624,11 @@ function validateEditNames() {
     });
 
     if (names.length === 0) {
-        hasErrors = true;
         errorDiv.textContent = 'Please enter at least one child\'s name.';
-    } else if (names.length !== new Set(names).size) {
-        hasErrors = true;
+    } else if (hasDuplicate) {
         errorDiv.textContent = 'Each child must have a unique name.';
+    } else if (hasErrors) {
+        errorDiv.textContent = 'Please fill in all names.';
     } else {
         errorDiv.textContent = '';
     }
