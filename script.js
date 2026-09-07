@@ -558,6 +558,110 @@ function updateTableStructure() {
     }
 }
 
+// Edit Children's Names (Edit Mode) - renames existing children in place,
+// keeping their `id` stable so existing task completion data isn't orphaned.
+function openEditNamesModal() {
+    const overlay = document.getElementById('editNamesOverlay');
+    const area = document.getElementById('editNamesSetup');
+    const errorDiv = document.getElementById('editNamesError');
+
+    area.innerHTML = '';
+    errorDiv.textContent = '';
+    errorDiv.classList.add('hidden');
+
+    familyChildren.forEach(child => {
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'child-input-group';
+
+        const input = document.createElement('input');
+        input.className = 'child-input';
+        input.type = 'text';
+        input.value = child.name;
+        input.dataset.childId = child.id;
+        input.addEventListener('input', validateEditNames);
+
+        inputGroup.appendChild(input);
+        area.appendChild(inputGroup);
+    });
+
+    overlay.classList.add('active');
+
+    setTimeout(() => {
+        const firstInput = area.querySelector('.child-input');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }, 300);
+}
+
+function closeEditNamesModal() {
+    document.getElementById('editNamesOverlay').classList.remove('active');
+}
+
+function validateEditNames() {
+    const area = document.getElementById('editNamesSetup');
+    const errorDiv = document.getElementById('editNamesError');
+    const inputs = area.querySelectorAll('.child-input');
+
+    let hasErrors = false;
+    let hasDuplicate = false;
+    const names = [];
+
+    inputs.forEach(input => {
+        const name = input.value.trim();
+        input.classList.remove('error');
+
+        if (name === '') {
+            hasErrors = true;
+            input.classList.add('error');
+        } else if (names.includes(name.toLowerCase())) {
+            hasErrors = true;
+            hasDuplicate = true;
+            input.classList.add('error');
+        } else {
+            names.push(name.toLowerCase());
+        }
+    });
+
+    if (names.length === 0) {
+        errorDiv.textContent = 'Please enter at least one child\'s name.';
+    } else if (hasDuplicate) {
+        errorDiv.textContent = 'Each child must have a unique name.';
+    } else if (hasErrors) {
+        errorDiv.textContent = 'Please fill in all names.';
+    } else {
+        errorDiv.textContent = '';
+    }
+
+    errorDiv.classList.toggle('hidden', !hasErrors);
+
+    return !hasErrors;
+}
+
+function saveEditNames() {
+    if (!validateEditNames()) {
+        return;
+    }
+
+    const area = document.getElementById('editNamesSetup');
+    const inputs = area.querySelectorAll('.child-input');
+
+    inputs.forEach(input => {
+        const child = familyChildren.find(c => c.id === input.dataset.childId);
+        if (child) {
+            const newName = input.value.trim();
+            child.name = newName;
+            child.shortName = newName.length > 6 ? newName.substring(0, 4) : newName;
+        }
+    });
+
+    closeEditNamesModal();
+    updateTableStructure();
+    renderTasks();
+    saveToCloud();
+    showMessage("Children's names updated!", 'success');
+}
+
 // Domain Authorization Functions
 function isAuthorizedDomain(data) {
     const currentDomain = window.location.hostname;
@@ -891,6 +995,7 @@ document.getElementById('todoModeBtn').addEventListener('click', () => {
     document.getElementById('todoModeBtn').className = 'mode-btn todo-mode';
     document.getElementById('editModeBtn').className = 'mode-btn inactive';
     document.getElementById('addTaskForm').classList.add('hidden');
+    document.getElementById('editNamesContainer').classList.add('hidden');
     document.getElementById('resetButtonContainer').classList.remove('hidden');
 
     // Message area - show display, hide textarea
@@ -908,6 +1013,7 @@ document.getElementById('editModeBtn').addEventListener('click', () => {
     document.getElementById('todoModeBtn').className = 'mode-btn inactive';
     document.getElementById('editModeBtn').className = 'mode-btn edit-mode';
     document.getElementById('addTaskForm').classList.remove('hidden');
+    document.getElementById('editNamesContainer').classList.remove('hidden');
     document.getElementById('resetButtonContainer').classList.add('hidden');
 
     // Message area - show textarea, hide display

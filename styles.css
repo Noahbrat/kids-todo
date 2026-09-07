@@ -453,6 +453,12 @@ h1 {
     transform: scale(1.05);
 }
 
+.edit-names-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+
 .emoji-picker {
     position: fixed;
     top: 0;
