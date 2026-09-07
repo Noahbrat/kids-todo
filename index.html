@@ -64,6 +64,10 @@
         <button class="add-task-btn" onclick="addTask()">Add Task</button>
     </div>
 
+    <div class="edit-names-container hidden" id="editNamesContainer">
+        <button class="add-task-btn" onclick="openEditNamesModal()">✏️ Edit Children's Names</button>
+    </div>
+
     <div class="message-area" id="messageArea">
         <div class="message-header">
             <span>💝</span>
@@ -136,6 +140,25 @@
     </div>
 </div>
 
-<script src="script.js?v=2"></script>
+<!-- Edit Children's Names Overlay -->
+<div class="setup-overlay" id="editNamesOverlay">
+    <div class="setup-wizard">
+        <h2>✏️ Edit Children's Names</h2>
+        <p>Update the names shown for each child. Existing tasks and checkmarks are kept.</p>
+
+        <div class="children-setup" id="editNamesSetup">
+            <!-- Rename input fields will be added here by JavaScript -->
+        </div>
+
+        <div class="setup-error hidden" id="editNamesError"></div>
+
+        <div class="setup-buttons">
+            <button class="setup-btn setup-btn-secondary" onclick="closeEditNamesModal()">Cancel</button>
+            <button class="setup-btn setup-btn-primary" onclick="saveEditNames()">Save Names</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js?v=3"></script>
 </body>
 </html>
